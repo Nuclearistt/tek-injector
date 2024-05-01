@@ -71,18 +71,17 @@
 //===- TEK Injector error codes -------------------------------------------===//
 
 enum error_code {
+  EC_SUCCESS = 0,
+  EC_MIN = -8,
   // Injector error codes
-  IEC_SUCCESS,
   IEC_VIRTUAL_PROTECT_FAILED,
   IEC_CREATE_PROCESS_FAILED,
   IEC_VIRTUAL_ALLOC_FAILED,
   IEC_WRITE_PROC_MEM_FAILED,
   IEC_SET_THREAD_CTX_FAILED,
   // Game error codes
-  GEC_MIN,
-  GEC_STEAM_API_INIT_FAILED = GEC_MIN,
-  GEC_EOS_AUTH_LOGIN_FAILED,
-  GEC_MAX
+  GEC_STEAM_API_INIT_FAILED,
+  GEC_EOS_AUTH_LOGIN_FAILED
 };
 const wchar_t *const error_code_strings[] = {
     L"Failed to change PE section protection",
@@ -1070,7 +1069,7 @@ enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
   if (!processCreated)
     return IEC_CREATE_PROCESS_FAILED;
   // Allocate memory in game process for TEK Injector image
-  enum error_code result = IEC_SUCCESS;
+  enum error_code result = EC_SUCCESS;
   const LPVOID imageRegion =
       VirtualAllocEx(procInfo.hProcess, NULL, imageSize,
                      MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
@@ -1105,18 +1104,50 @@ enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
   // Begin thread execution
   ResumeThread(procInfo.hThread);
   // Wait 10 seconds to see if game exits with any error code
-  if (!WaitForSingleObject(procInfo.hProcess, 10000)) {
-    DWORD exitCode;
-    GetExitCodeProcess(procInfo.hProcess, &exitCode);
-    if (exitCode >= GEC_MIN && exitCode < GEC_MAX)
-      result = exitCode;
-  }
+  if (!WaitForSingleObject(procInfo.hProcess, 10000))
+    GetExitCodeProcess(procInfo.hProcess, (LPDWORD)&result);
 Exit:
-  if (result && result < GEC_MIN)
+  if (result > EC_MIN && result <= IEC_SET_THREAD_CTX_FAILED)
     TerminateThread(procInfo.hThread, result);
   CloseHandle(procInfo.hThread);
   CloseHandle(procInfo.hProcess);
   return result;
+}
+
+void show_error_message(enum error_code code) {
+  if (code < 0 && code > EC_MIN)
+    MessageBoxW(NULL,
+                error_code_strings[code + sizeof(error_code_strings) /
+                                              sizeof(wchar_t *)],
+                L"TEK Injector", MB_ICONERROR);
+  else {
+    LPWSTR message;
+    if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                           FORMAT_MESSAGE_FROM_SYSTEM,
+                       NULL, code, 0, (LPWSTR)&message, 0, NULL)) {
+      MessageBoxW(NULL, message, L"TEK Injector", MB_ICONERROR);
+      LocalFree(message);
+    } else {
+      WCHAR messageBuffer[] = {L"Game process exited with code 0x00000000"};
+      DWORD value = (code & 0xF0000000) >> 28;
+      messageBuffer[32] = (value > 9 ? L'7' : L'0') + value;
+      value = (code & 0xF0000000) >> 24;
+      messageBuffer[33] = (value > 9 ? L'7' : L'0') + value;
+      value = (code & 0xF0000000) >> 20;
+      messageBuffer[34] = (value > 9 ? L'7' : L'0') + value;
+      value = (code & 0xF0000000) >> 16;
+      messageBuffer[35] = (value > 9 ? L'7' : L'0') + value;
+      value = (code & 0xF0000000) >> 12;
+      messageBuffer[36] = (value > 9 ? L'7' : L'0') + value;
+      value = (code & 0xF0000000) >> 8;
+      messageBuffer[37] = (value > 9 ? L'7' : L'0') + value;
+      value = (code & 0xF0000000) >> 4;
+      messageBuffer[38] = (value > 9 ? L'7' : L'0') + value;
+      value = code & 0x0000000F;
+      messageBuffer[39] = (value > 9 ? L'7' : L'0') + value;
+      MessageBoxW(NULL, messageBuffer, L"TEK Injector", MB_ICONERROR);
+    }
+  }
 }
 
 // Exported entry points that can be used if TEK Injector is loaded into other
@@ -1135,9 +1166,8 @@ __declspec(dllexport) void launch_asa(const wchar_t *exePath, int argc,
     SetEnvironmentVariableA("GameAppId", "480");
     result = launch_game_and_inject(exePath, argc, argv, asa_entry, true);
   }
-  if (result && result < GEC_MAX)
-    MessageBoxW(NULL, error_code_strings[result - 1], L"TEK Injector",
-                MB_ICONERROR);
+  if (result)
+    show_error_message(result);
 }
 __declspec(dllexport) void launch_ase(const wchar_t *exePath, int argc,
                                       const wchar_t **argv) {
@@ -1152,9 +1182,8 @@ __declspec(dllexport) void launch_ase(const wchar_t *exePath, int argc,
     SetEnvironmentVariableA("GameAppId", "480");
     result = launch_game_and_inject(exePath, argc, argv, ase_entry, true);
   }
-  if (result && result < GEC_MAX)
-    MessageBoxW(NULL, error_code_strings[result - 1], L"TEK Injector",
-                MB_ICONERROR);
+  if (result)
+    show_error_message(result);
 }
 
 // Main entry point used when running standalone tek-injector.exe
@@ -1201,8 +1230,7 @@ void __declspec(noreturn) entry() {
         launch_game_and_inject(gameExe, argc - 1, argv + 1, entryPoint, false);
   }
   LocalFree(argv);
-  if (result && result < GEC_MAX)
-    MessageBoxW(NULL, error_code_strings[result - 1], L"TEK Injector",
-                MB_ICONERROR);
+  if (result)
+    show_error_message(result);
   ExitProcess(result);
 }
