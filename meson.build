@@ -33,5 +33,6 @@ executable(
     '/ENTRY:entry',
     '/MANIFEST:EMBED',
     '/MANIFESTINPUT:../tek-injector.manifest',
+    '/MANIFESTUAC:level=\'requireAdministrator\'',
   ],
 )
