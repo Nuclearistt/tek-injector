@@ -1058,8 +1058,9 @@ enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
   commandLine[offset] = L'\0';
   // Create suspended game process
   STARTUPINFOW startupInfo;
-  startupInfo.cb = sizeof(STARTUPINFOW);
+  memset(&startupInfo, 0, sizeof(STARTUPINFOW));
   PROCESS_INFORMATION procInfo;
+  memset(&procInfo, 0, sizeof(PROCESS_INFORMATION));
   const BOOL processCreated =
       CreateProcessW(exePath, commandLine, NULL, NULL, FALSE,
                      setHighPriority ? CREATE_SUSPENDED | HIGH_PRIORITY_CLASS
