@@ -21,6 +21,8 @@ What it changes for ARK: Survival Ascended:
 
 Besides, TEK Injector has a special treatment for `-high` command-line argument which will make it run the game with high process priority class.
 
+`-noadmin` command-line argument can be used to start game process without admin privileges (TEK Injector itself must be run with them)
+
 ## How to use
 
 Standalone: download tek-injector.exe from [releases](https://github.com/Nuclearistt/tek-injector/releases), place it in your game's `ShooterGame\Binaries\Win64` directory and run it. All command-line arguments that are passed to TEK Injector will be forwarded to the game.
