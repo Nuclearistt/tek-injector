@@ -75,6 +75,8 @@ enum error_code {
   EC_MIN = -8,
   // Injector error codes
   IEC_VIRTUAL_PROTECT_FAILED,
+  IEC_DUPLICATE_TOKEN_FAILED,
+  IEC_SET_TOKEN_INF_FAILED,
   IEC_CREATE_PROCESS_FAILED,
   IEC_VIRTUAL_ALLOC_FAILED,
   IEC_WRITE_PROC_MEM_FAILED,
@@ -85,6 +87,8 @@ enum error_code {
 };
 const wchar_t *const error_code_strings[] = {
     L"Failed to change PE section protection",
+    L"Failed to duplicate process token",
+    L"Failed to set token information",
     L"Failed to create game process",
     L"Failed to allocate memory in game process",
     L"Failed to write image to game process",
@@ -1047,10 +1051,13 @@ enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
       1 + GetFullPathNameW(exePath, commandLineLength, commandLine + 1, NULL);
   commandLine[offset++] = L'\"';
   bool setHighPriority = false;
+  bool reduceIntegrityLevel = false;
   for (int i = 0; i < argc; i++) {
     const size_t argLength = wcslen(argv[i]);
     if (argLength == 5 && !wcscmp(argv[i], L"-high"))
       setHighPriority = true; // Game doesn't use this argument now but we do
+    else if (argLength == 8 && !wcscmp(argv[i], L"-noadmin"))
+      reduceIntegrityLevel = true;
     commandLine[offset++] = L' ';
     memcpy(commandLine + offset, argv[i], argLength * sizeof(WCHAR));
     offset += argLength;
@@ -1061,11 +1068,43 @@ enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
   memset(&startupInfo, 0, sizeof(STARTUPINFOW));
   PROCESS_INFORMATION procInfo;
   memset(&procInfo, 0, sizeof(PROCESS_INFORMATION));
-  const BOOL processCreated =
-      CreateProcessW(exePath, commandLine, NULL, NULL, FALSE,
-                     setHighPriority ? CREATE_SUSPENDED | HIGH_PRIORITY_CLASS
-                                     : CREATE_SUSPENDED,
-                     NULL, NULL, &startupInfo, &procInfo);
+  const DWORD creationFlags = setHighPriority
+                                  ? CREATE_SUSPENDED | HIGH_PRIORITY_CLASS
+                                  : CREATE_SUSPENDED;
+  BOOL processCreated;
+  // Create a token with medium integrity level and create process with it
+  //    requested
+  if (reduceIntegrityLevel) {
+    // Get current process token (with high integrity level)
+    HANDLE token;
+    OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE, &token);
+    // Duplicate it
+    HANDLE mediumIntegrityToken;
+    const BOOL tokenDuped = DuplicateTokenEx(
+        token,
+        TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_QUERY |
+            TOKEN_ADJUST_DEFAULT,
+        NULL, SecurityImpersonation, TokenPrimary, &mediumIntegrityToken);
+    CloseHandle(token);
+    if (!tokenDuped)
+      return IEC_DUPLICATE_TOKEN_FAILED;
+    // Set medium integrity level
+    DWORD sid[3] = {0x101, 0x10000000, SECURITY_MANDATORY_MEDIUM_RID};
+    TOKEN_MANDATORY_LABEL mandatoryLabel = {{&sid, SE_GROUP_INTEGRITY}};
+    if (!SetTokenInformation(mediumIntegrityToken, TokenIntegrityLevel,
+                             &mandatoryLabel, sizeof(TOKEN_MANDATORY_LABEL))) {
+      CloseHandle(mediumIntegrityToken);
+      return IEC_SET_TOKEN_INF_FAILED;
+    }
+    // Create process
+    processCreated = CreateProcessAsUserW(
+        mediumIntegrityToken, exePath, commandLine, NULL, NULL, FALSE,
+        creationFlags, NULL, NULL, &startupInfo, &procInfo);
+    CloseHandle(mediumIntegrityToken);
+  } else
+    processCreated =
+        CreateProcessW(exePath, commandLine, NULL, NULL, FALSE, creationFlags,
+                       NULL, NULL, &startupInfo, &procInfo);
   HeapFree(GetProcessHeap(), 0, commandLine);
   if (!processCreated)
     return IEC_CREATE_PROCESS_FAILED;

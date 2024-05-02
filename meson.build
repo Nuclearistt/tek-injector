@@ -10,6 +10,7 @@ project(
     'b_vscrt': 'mt',
     'c_std': 'c2x',
     'c_winlibs': [
+      'advapi32.lib',
       'kernel32.lib',
       'libucrt.lib',
       'libvcruntime.lib',
