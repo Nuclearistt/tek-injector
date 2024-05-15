@@ -57,22 +57,14 @@
 #define NOPROFILER
 #define NODEFERWINDOWPOS
 #define NOMCX
-#pragma clang diagnostic push
-// Clang really doesn't like Win32 API
-#pragma clang diagnostic ignored "-Wignored-attributes"
-#pragma clang diagnostic ignored "-Wignored-pragma-intrinsic"
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
-#pragma clang diagnostic ignored "-Wnonportable-include-path"
-#pragma clang diagnostic ignored "-Wpragma-pack"
 #include <Windows.h>
 #include <shellapi.h>
-#pragma clang diagnostic pop
 
 //===- TEK Injector error codes -------------------------------------------===//
 
 enum error_code {
   EC_SUCCESS = 0,
-  EC_MIN = -8,
+  EC_MIN = -10,
   // Injector error codes
   IEC_VIRTUAL_PROTECT_FAILED,
   IEC_DUPLICATE_TOKEN_FAILED,
