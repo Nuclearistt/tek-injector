@@ -13,8 +13,8 @@
 //    have no DLL dependencies other than ntdll.dll and kernel32.dll which
 //    reside at the same address in all process, and minimize the use of CRT as
 //    most of its functions create or use context in heap outside of image.
-//    There are dependencies on shell32.dll and user32.dll, but they're only
-//    used on host side so don't cause any issues.
+//    There are dependencies on advapi32.dll, shell32.dll and user32.dll, but
+//    they're only used on host side so don't cause any issues.
 //
 //===----------------------------------------------------------------------===//
 
@@ -77,7 +77,7 @@ enum error_code {
   GEC_STEAM_API_INIT_FAILED,
   GEC_EOS_AUTH_LOGIN_FAILED
 };
-const wchar_t *const error_code_strings[] = {
+static const wchar_t *const error_code_strings[] = {
     L"Failed to change PE section protection",
     L"Failed to duplicate process token",
     L"Failed to set token information",
@@ -137,18 +137,18 @@ struct cpp_interface_wrapper {
   void *const *vtable;      // Pointer to virtual method table
   void *original_interface; // Read by vmn_stub methods
 };
-uint64_t steam_id; // Steam ID of current user
+static uint64_t steam_id; // Steam ID of current user
 
 //===----- ISteamApps -----------------------------------------------------===//
 
-void *isteam_apps_vtable[29];
-struct cpp_interface_wrapper isteam_apps_wrapper;
+static void *isteam_apps_vtable[29];
+static struct cpp_interface_wrapper isteam_apps_wrapper;
 
-bool return_true() { return true; }
-int asa_get_dlc_count() { return 2; }
-bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
-                               uint32_t *pAppID, bool *pbAvailable,
-                               char *pchName) {
+static bool return_true() { return true; }
+static int asa_get_dlc_count() { return 2; }
+static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
+                                      uint32_t *pAppID, bool *pbAvailable,
+                                      char *pchName) {
   *pbAvailable = true;
   switch (iDLC) {
   case 0:
@@ -164,7 +164,8 @@ bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
     return false;
   }
 }
-uint64_t *get_app_owner(struct cpp_interface_wrapper *_, uint64_t *steamId) {
+static uint64_t *get_app_owner(struct cpp_interface_wrapper *_,
+                               uint64_t *steamId) {
   *steamId = steam_id;
   return steamId;
 }
@@ -182,12 +183,12 @@ struct server_rules_callback_wrapper {
   int query_handle; // Handle returned by ServerRules()
 };
 
-void *server_rules_callback_wrapper_vtable[3];
-void *isteam_matchmaking_servers_vtable[17];
-struct cpp_interface_wrapper isteam_matchmaking_servers_wrapper;
+static void *server_rules_callback_wrapper_vtable[3];
+static void *isteam_matchmaking_servers_vtable[17];
+static struct cpp_interface_wrapper isteam_matchmaking_servers_wrapper;
 
-void rules_responded(struct server_rules_callback_wrapper *wrapper,
-                     const char *pchRule, const char *pchValue) {
+static void rules_responded(struct server_rules_callback_wrapper *wrapper,
+                            const char *pchRule, const char *pchValue) {
   // If server reports that it has BattlEye or doesn't have TEK Wrapper, cancel
   //    the query
   if ((!strcmp(pchRule, "SERVERUSESBATTLEYE_b") && pchValue[0] != 'f') ||
@@ -208,7 +209,8 @@ void rules_responded(struct server_rules_callback_wrapper *wrapper,
         (*((void ***)wrapper->original_callback))[0]))(
         wrapper->original_callback, pchRule, pchValue);
 }
-void rules_failed_to_respond(struct server_rules_callback_wrapper *wrapper) {
+static void
+rules_failed_to_respond(struct server_rules_callback_wrapper *wrapper) {
   // Call RulesFailedToRespond on original callback
   if (wrapper->original_callback)
     ((void (*)(void *))((*((void ***)wrapper->original_callback))[1]))(
@@ -216,7 +218,8 @@ void rules_failed_to_respond(struct server_rules_callback_wrapper *wrapper) {
   // Free the memory used for wrapper object
   HeapFree(GetProcessHeap(), 0, wrapper);
 }
-void rules_refresh_complete(struct server_rules_callback_wrapper *wrapper) {
+static void
+rules_refresh_complete(struct server_rules_callback_wrapper *wrapper) {
   // Call RulesRefreshComplete on original callback
   if (wrapper->original_callback)
     ((void (*)(void *))((*((void ***)wrapper->original_callback))[2]))(
@@ -225,7 +228,7 @@ void rules_refresh_complete(struct server_rules_callback_wrapper *wrapper) {
   HeapFree(GetProcessHeap(), 0, wrapper);
 }
 
-void *
+static void *
 request_internet_server_list(struct cpp_interface_wrapper *wrapper,
                              uint32_t iApp,
                              struct MatchMakingKeyValuePair_t **ppchFilters,
@@ -242,8 +245,8 @@ request_internet_server_list(struct cpp_interface_wrapper *wrapper,
       wrapper->original_interface, iApp, ppchFilters, nFilters,
       pRequestServersResponse);
 }
-int server_rules(struct cpp_interface_wrapper *wrapper, uint32_t unIP,
-                 uint16_t usPort, void *pRequestServersResponse) {
+static int server_rules(struct cpp_interface_wrapper *wrapper, uint32_t unIP,
+                        uint16_t usPort, void *pRequestServersResponse) {
   // Create a callback wrapper for this query
   struct server_rules_callback_wrapper *const callbackWrapper = HeapAlloc(
       GetProcessHeap(), 0, sizeof(struct server_rules_callback_wrapper));
@@ -258,10 +261,10 @@ int server_rules(struct cpp_interface_wrapper *wrapper, uint32_t unIP,
 
 //===----- ISteamUGC ------------------------------------------------------===//
 
-void *isteam_ugc_vtable[31];
-struct cpp_interface_wrapper isteam_ugc_wrapper;
+static void *isteam_ugc_vtable[31];
+static struct cpp_interface_wrapper isteam_ugc_wrapper;
 
-uint32_t get_num_subscribed_items() {
+static uint32_t get_num_subscribed_items() {
   // Search the Mods directory in game root
   WIN32_FIND_DATAW findData;
   const HANDLE find = FindFirstFileExW(
@@ -285,9 +288,9 @@ uint32_t get_num_subscribed_items() {
   FindClose(find);
   return numInstalledMods;
 }
-uint32_t get_subscribed_items(struct cpp_interface_wrapper *_,
-                              uint64_t *pvecPublishedFileID,
-                              uint32_t cMaxEntries) {
+static uint32_t get_subscribed_items(struct cpp_interface_wrapper *_,
+                                     uint64_t *pvecPublishedFileID,
+                                     uint32_t cMaxEntries) {
   // Search the Mods directory in game root
   WIN32_FIND_DATAW findData;
   const HANDLE find = FindFirstFileExW(
@@ -312,10 +315,10 @@ uint32_t get_subscribed_items(struct cpp_interface_wrapper *_,
   FindClose(find);
   return cMaxEntries;
 }
-bool get_item_install_info(struct cpp_interface_wrapper *_,
-                           uint64_t nPublishedFileID, uint64_t *punSizeOnDisk,
-                           char *pchFolder, uint32_t cchFolderSize,
-                           bool *pbLegacyItem) {
+static bool get_item_install_info(struct cpp_interface_wrapper *_,
+                                  uint64_t nPublishedFileID,
+                                  uint64_t *punSizeOnDisk, char *pchFolder,
+                                  uint32_t cchFolderSize, bool *pbLegacyItem) {
   *punSizeOnDisk = 0; // This is not used by the game so not worth computing
   *pbLegacyItem = false;
   WCHAR pathBuffer[MAX_PATH] = L"..\\..\\..\\Mods\\";
@@ -343,17 +346,17 @@ bool get_item_install_info(struct cpp_interface_wrapper *_,
 
 //===----- ISteamUtils ----------------------------------------------------===//
 
-void *isteam_utils_vtable[38];
-struct cpp_interface_wrapper isteam_utils_wrapper;
+static void *isteam_utils_vtable[38];
+static struct cpp_interface_wrapper isteam_utils_wrapper;
 
-uint32_t asa_get_app_id() { return 2399830; }
-uint32_t ase_get_app_id() { return 346110; }
+static uint32_t asa_get_app_id() { return 2399830; }
+static uint32_t ase_get_app_id() { return 346110; }
 
 //===--- steam_api64.dll function wrappers --------------------------------===//
 
 // Sets up ISteamApps wrappers in ASE
-void *(*SteamApps)();
-void *SteamApps_wrapper() {
+static void *(*SteamApps)();
+static void *SteamApps_wrapper() {
   if (!isteam_apps_wrapper.original_interface) {
     isteam_apps_vtable[0] = return_true;    // BIsSubscribed
     isteam_apps_vtable[1] = vm1_stub;       // BIsLowViolence
@@ -386,8 +389,8 @@ void *SteamApps_wrapper() {
 }
 
 // Sets up ISteamMatchmakingServers wrappers in ASE
-void *(*SteamMatchmakingServers)();
-void *SteamMatchmakingServers_wrapper() {
+static void *(*SteamMatchmakingServers)();
+static void *SteamMatchmakingServers_wrapper() {
   if (!isteam_matchmaking_servers_wrapper.original_interface) {
     server_rules_callback_wrapper_vtable[0] = rules_responded;
     server_rules_callback_wrapper_vtable[1] = rules_failed_to_respond;
@@ -421,8 +424,8 @@ void *SteamMatchmakingServers_wrapper() {
 }
 
 // Sets up ISteamUGC wrappers in ASE
-void *(*SteamUGC)();
-void *SteamUGC_wrapper() {
+static void *(*SteamUGC)();
+static void *SteamUGC_wrapper() {
   if (!isteam_ugc_wrapper.original_interface) {
     isteam_ugc_vtable[0] = vm0_stub;   // CreateQueryUserUGCRequest
     isteam_ugc_vtable[1] = vm1_stub;   // CreateQueryAllUGCRequest
@@ -462,8 +465,8 @@ void *SteamUGC_wrapper() {
 }
 
 // Sets up ISteamUtils wrappers in ASE
-void *(*SteamUtils)();
-void *SteamUtils_wrapper() {
+static void *(*SteamUtils)();
+static void *SteamUtils_wrapper() {
   if (!isteam_utils_wrapper.original_interface) {
     isteam_utils_vtable[0] = vm0_stub;       // GetSecondsSinceAppActive
     isteam_utils_vtable[1] = vm1_stub;       // GetSecondsSinceComputerActive
@@ -498,9 +501,10 @@ void *SteamUtils_wrapper() {
 
 // Sets up interface wrappers in ASA, the only function that provides access
 //    to Steam API interfaces in its newer versions
-void *(*SteamInternal_FindOrCreateUserInterface)(int, const char *);
-void *SteamInternal_FindOrCreateUserInterface_wrapper(int hSteamUser,
-                                                      const char *pszVersion) {
+static void *(*SteamInternal_FindOrCreateUserInterface)(int, const char *);
+static void *
+SteamInternal_FindOrCreateUserInterface_wrapper(int hSteamUser,
+                                                const char *pszVersion) {
   void *interface =
       SteamInternal_FindOrCreateUserInterface(hSteamUser, pszVersion);
   if (!strcmp(pszVersion, "STEAMAPPS_INTERFACE_VERSION008")) {
@@ -708,27 +712,27 @@ struct EOS_Connect_LoginOptions {
 //===--- EOSSDK-Win64-Shipping.dll function wrappers ----------------------===//
 
 // Used by eos_auth_login_callback to track its state
-bool eos_persistent_auth_failed = false;
+static bool eos_persistent_auth_failed = false;
 // Used by eos_auth_login_callback
-void *restrict auth_interface;
+static void *restrict auth_interface;
 // Stores the token between EOS_Platform_Create and EOS_Connect_Login calls
-struct EOS_Auth_IdToken *eos_auth_token;
+static struct EOS_Auth_IdToken *eos_auth_token;
 
-int (*EOS_Auth_CopyIdToken)(void *Handle,
-                            const struct EOS_Auth_CopyIdTokenOptions *Options,
-                            struct EOS_Auth_IdToken **OutIdToken);
-void (*EOS_Auth_Login)(void *Handle,
-                       const struct EOS_Auth_LoginOptions *Options,
-                       void *ClientData,
-                       void (*const CompletionDelegate)(
-                           const struct EOS_Auth_LoginCallbackInfo *));
-void *(*EOS_Platform_GetAuthInterface)(void *Handle);
-void *(*EOS_Platform_Tick)(void *Handle);
+static int (*EOS_Auth_CopyIdToken)(
+    void *Handle, const struct EOS_Auth_CopyIdTokenOptions *Options,
+    struct EOS_Auth_IdToken **OutIdToken);
+static void (*EOS_Auth_Login)(void *Handle,
+                              const struct EOS_Auth_LoginOptions *Options,
+                              void *ClientData,
+                              void (*const CompletionDelegate)(
+                                  const struct EOS_Auth_LoginCallbackInfo *));
+static void *(*EOS_Platform_GetAuthInterface)(void *Handle);
+static void *(*EOS_Platform_Tick)(void *Handle);
 
-int (*EOS_Connect_CopyProductUserInfo)(
+static int (*EOS_Connect_CopyProductUserInfo)(
     void *Handle, const void *Options,
     struct EOS_Connect_ExternalAccountInfo **OutExternalAccountInfo);
-int EOS_Connect_CopyProductUserInfo_wrapper(
+static int EOS_Connect_CopyProductUserInfo_wrapper(
     void *Handle, const void *Options,
     struct EOS_Connect_ExternalAccountInfo **OutExternalAccountInfo) {
   int result =
@@ -743,13 +747,14 @@ int EOS_Connect_CopyProductUserInfo_wrapper(
   return result;
 }
 
-void (*EOS_Connect_Login)(void *Handle,
+static void (*EOS_Connect_Login)(void *Handle,
+                                 const struct EOS_Connect_LoginOptions *Options,
+                                 void *ClientData,
+                                 const void *CompletionDelegate);
+static void
+EOS_Connect_Login_wrapper(void *Handle,
                           const struct EOS_Connect_LoginOptions *Options,
-                          void *ClientData, const void *CompletionDelegate);
-void EOS_Connect_Login_wrapper(void *Handle,
-                               const struct EOS_Connect_LoginOptions *Options,
-                               void *ClientData,
-                               const void *CompletionDelegate) {
+                          void *ClientData, const void *CompletionDelegate) {
   // Replace Steam session ticket with our Epic ID token
   struct EOS_Connect_Credentials *credentials =
       (struct EOS_Connect_Credentials *)Options->Credentials;
@@ -758,7 +763,8 @@ void EOS_Connect_Login_wrapper(void *Handle,
   EOS_Connect_Login(Handle, Options, ClientData, CompletionDelegate);
 }
 
-void eos_auth_login_callback(const struct EOS_Auth_LoginCallbackInfo *Data) {
+static void
+eos_auth_login_callback(const struct EOS_Auth_LoginCallbackInfo *Data) {
   if (!Data->ResultCode)
     *((void **)Data->ClientData) = Data->LocalUserId; // Login succeeded
   else if (eos_persistent_auth_failed)
@@ -776,8 +782,8 @@ void eos_auth_login_callback(const struct EOS_Auth_LoginCallbackInfo *Data) {
 
 // This is one of the first functions called in EOS API so it can be used for
 //    early Epic Games authenticaiton
-void *(*EOS_Platform_Create)(const void *Options);
-void *EOS_Platform_Create_wrapper(const void *Options) {
+static void *(*EOS_Platform_Create)(const void *Options);
+static void *EOS_Platform_Create_wrapper(const void *Options) {
   void *const platform = EOS_Platform_Create(Options);
   auth_interface = EOS_Platform_GetAuthInterface(platform);
   // Try to login with EOS_LCT_PersistentAuth first
@@ -801,7 +807,7 @@ void *EOS_Platform_Create_wrapper(const void *Options) {
 //===--- Process entry point wrappers -------------------------------------===//
 
 // Substitutes entry point for ArkAscended.exe
-void __declspec(noreturn)
+static void __declspec(noreturn)
 asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
   // Step 1: load steam_api64.dll, find its IAT and call SteamAPI_Init
   // Get image headers
@@ -919,7 +925,7 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
 }
 
 // Substitutes entry point for ShooterGame.exe
-void __declspec(noreturn)
+static void __declspec(noreturn)
 ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
   // Step 1: load steam_api64.dll, find its IAT and call SteamAPI_Init
   // Get image headers
@@ -1008,10 +1014,10 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
 
 //===- Host-side functions (called inside injector process) ---------------===//
 
-enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
-                                       const wchar_t **argv,
-                                       const void *entryPoint,
-                                       bool isEmbedded) {
+static enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
+                                              const wchar_t **argv,
+                                              const void *entryPoint,
+                                              bool isEmbedded) {
   // Get image size from PE optional header
   uint8_t *const module = (uint8_t *)GetModuleHandleW(NULL);
   const IMAGE_NT_HEADERS64 *const ntHeaders =
@@ -1146,7 +1152,7 @@ Exit:
   return result;
 }
 
-void show_error_message(enum error_code code) {
+static void show_error_message(enum error_code code) {
   if (code < 0 && code > EC_MIN)
     MessageBoxW(NULL,
                 error_code_strings[code + sizeof(error_code_strings) /
