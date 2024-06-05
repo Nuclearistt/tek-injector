@@ -145,20 +145,29 @@ static void *isteam_apps_vtable[29];
 static struct cpp_interface_wrapper isteam_apps_wrapper;
 
 static bool return_true() { return true; }
-static int asa_get_dlc_count() { return 2; }
+static int asa_get_dlc_count() { return 4; }
 static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
                                       uint32_t *pAppID, bool *pbAvailable,
                                       char *pchName) {
   *pbAvailable = true;
   switch (iDLC) {
   case 0:
+    *pAppID = 2827030;
+    memcpy(pchName, "ARK: The Center Ascended",
+           sizeof("ARK: The Center Ascended"));
+    return true;
+  case 1:
     *pAppID = 2849450;
     memcpy(pchName, "ARK: Scorched Earth Ascended",
            sizeof("ARK: Scorched Earth Ascended"));
     return true;
-  case 1:
+  case 2:
     *pAppID = 2881150;
     memcpy(pchName, "ARK: Bob's Tall Tales", sizeof("ARK: Bob's Tall Tales"));
+    return true;
+  case 3:
+    *pAppID = 2972680;
+    memcpy(pchName, "ARK Fantastic Tames - Pyromane", sizeof("ARK Fantastic Tames - Pyromane"));
     return true;
   default:
     return false;
