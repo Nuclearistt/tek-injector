@@ -1112,7 +1112,6 @@ static enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
     processCreated =
         CreateProcessW(exePath, commandLine, NULL, NULL, FALSE, creationFlags,
                        NULL, NULL, &startupInfo, &procInfo);
-  HeapFree(GetProcessHeap(), 0, commandLine);
   if (!processCreated)
     return IEC_CREATE_PROCESS_FAILED;
   // Allocate memory in game process for TEK Injector image

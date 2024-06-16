@@ -1,7 +1,7 @@
 project(
   'TEK Injector',
   'c',
-  version: '1.0.2',
+  version: '1.0.3',
   default_options: {
     'optimization': '3',
     'warning_level': '3',
