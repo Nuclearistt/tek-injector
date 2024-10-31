@@ -145,7 +145,7 @@ static void *isteam_apps_vtable[29];
 static struct cpp_interface_wrapper isteam_apps_wrapper;
 
 static bool return_true() { return true; }
-static int asa_get_dlc_count() { return 4; }
+static int asa_get_dlc_count() { return 6; }
 static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
                                       uint32_t *pAppID, bool *pbAvailable,
                                       char *pchName) {
@@ -168,6 +168,16 @@ static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
   case 3:
     *pAppID = 2972680;
     memcpy(pchName, "ARK Fantastic Tames - Pyromane", sizeof("ARK Fantastic Tames - Pyromane"));
+    return true;
+  case 4:
+    *pAppID = 3059650;
+    memcpy(pchName, "ARK: Aberration Ascended",
+           sizeof("ARK: Aberration Ascended"));
+    return true;
+  case 5:
+    *pAppID = 3282470;
+    memcpy(pchName, "ARK Fantastic Tames - Dreadmare",
+           sizeof("ARK Fantastic Tames - Dreadmare"));
     return true;
   default:
     return false;
