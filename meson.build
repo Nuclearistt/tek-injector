@@ -3,12 +3,10 @@ project(
   'c',
   version: '1.0.3',
   default_options: {
-    'optimization': '3',
+    'optimization': '2',
     'warning_level': '3',
-    'b_lto': 'true',
-    'b_lto_mode': 'thin',
     'b_vscrt': 'mt',
-    'c_std': 'c2x',
+    'c_std': 'c23',
     'c_winlibs': [
       'advapi32.lib',
       'kernel32.lib',
@@ -19,21 +17,17 @@ project(
     ],
   },
 )
-res = import('windows').compile_resources(
-  'tek-injector.rc',
-  include_directories: '/usr/x86_64-pc-windows-msvc/include',
-)
 executable(
   'tek-injector',
   'main.c',
   'vm-stubs.s',
-  res,
+  import('windows').compile_resources('tek-injector.rc'),
   win_subsystem: 'windows',
   c_args: '/GS-',
   link_args: [
     '/ENTRY:entry',
     '/MANIFEST:EMBED',
-    '/MANIFESTINPUT:../tek-injector.manifest',
+    '/MANIFESTINPUT:' + meson.current_source_dir() / 'tek-injector.manifest',
     '/MANIFESTUAC:level=\'requireAdministrator\'',
   ],
 )
