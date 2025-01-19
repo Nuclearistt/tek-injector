@@ -18,6 +18,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "memscan.h"
+
 #include <stdint.h>
 // Exclude unnecessary APIs
 #define WIN32_LEAN_AND_MEAN
@@ -64,7 +66,7 @@
 
 enum error_code {
   EC_SUCCESS = 0,
-  EC_MIN = -10,
+  EC_MIN = -11,
   // Injector error codes
   IEC_VIRTUAL_PROTECT_FAILED,
   IEC_DUPLICATE_TOKEN_FAILED,
@@ -74,6 +76,7 @@ enum error_code {
   IEC_WRITE_PROC_MEM_FAILED,
   IEC_SET_THREAD_CTX_FAILED,
   // Game error codes
+  GEC_CFAPI_URL_NOT_FOUND,
   GEC_STEAM_API_INIT_FAILED,
   GEC_EOS_AUTH_LOGIN_FAILED
 };
@@ -85,6 +88,7 @@ static const wchar_t *const error_code_strings[] = {
     L"Failed to allocate memory in game process",
     L"Failed to write image to game process",
     L"Failed to modify game thread context",
+    L"api.curseforge.com string not found in .rdata section",
     L"Steam API initialization failed",
     L"Epic Games authentication failed"};
 
@@ -879,6 +883,38 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
   // Step 3: setup EOS SDK wrappers for Epic Games authentication if necessary
   // GetEnvironmentVariableA returns 4 when app ID is 480 (3 characters + null)
   if (GetEnvironmentVariableA("GameAppId", NULL, 0) == 4) {
+    // Find string L"api.curseforge.com" in the .rdata section and replace it
+    // with L"apiw.nuclearist.ru", which will handle external authentication
+    // for CF API and allow loading mod content for servers
+    const char *const asaModule = (const char *)GetModuleHandleW(NULL);
+    const IMAGE_NT_HEADERS64 *const ntHeaders =
+        (const IMAGE_NT_HEADERS64
+             *)(asaModule + ((const IMAGE_DOS_HEADER *)asaModule)->e_lfanew);
+    const int numSections = ntHeaders->FileHeader.NumberOfSections;
+    const IMAGE_SECTION_HEADER *const sections =
+        (const IMAGE_SECTION_HEADER *)(ntHeaders + 1);
+    for (int i = 0; i < numSections; ++i) {
+      const IMAGE_SECTION_HEADER *const section = sections + i;
+      if (strncmp((const char *)section->Name, ".rdata",
+                  sizeof section->Name)) {
+        continue;
+      }
+      const char *const rdataBase = asaModule + section->VirtualAddress;
+      const size_t strPos = memscan(rdataBase, section->Misc.VirtualSize,
+                                    L"api.curseforge.com", 36);
+      if (strPos == SIZE_MAX) {
+        ExitProcess(GEC_CFAPI_URL_NOT_FOUND);
+      }
+      char *const strAddr = (char *)rdataBase + strPos;
+      MEMORY_BASIC_INFORMATION mbi;
+      VirtualQuery(strAddr, &mbi, sizeof mbi);
+      DWORD oldProtect;
+      VirtualProtect(mbi.BaseAddress, mbi.RegionSize, PAGE_READWRITE,
+                     &oldProtect);
+      memcpy(strAddr, L"apiw.nuclearist.ru", 36);
+      VirtualProtect(mbi.BaseAddress, mbi.RegionSize, mbi.Protect, &oldProtect);
+      break;
+    }
     // Find delay import descriptor for EOSSDK-Win64-Shipping.dll
     delayDesc = delayDescBase;
     while (strcmp((const char *)(moduleBase + delayDesc->DllNameRVA),
@@ -1295,3 +1331,4 @@ void __declspec(noreturn) entry() {
     show_error_message(result);
   ExitProcess(result);
 }
+

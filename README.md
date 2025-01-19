@@ -16,12 +16,13 @@ What it changes for ARK: Survival Evolved:
 + Subscribed mods list instead of actually checking subscribtions searches mods folders in Mods directory located in root folder of the game (`..\..\..\Mods` relative to ShooterGame.exe), which allows recognizing and using mods even if game is not owned on current Steam account and cannot have subscriptions, as long as files are available
 + TODO: Add automatic mod downloads for servers via TEK Steam Client
 
-What it changes for ARK: Survival Ascended:
-+ When game is not owned on current Steam account, EOS_Connect authentication is done via an Epic Games account (you'll get a prompt in browser when launching game with it for the first time) so you can still use online subsystem and join servers
+What it changes for ARK: Survival Ascended (when the game is not owned on current Steam account):
++ EOS_Connect authentication is done via an Epic Games account (you'll get a prompt in browser when launching game with it for the first time) so you can still use online subsystem and join servers
++ CurseForge API host URL is changed to apiw.nuclearist.ru, which proxies to api.curseforge.com all requests except /v1/auth/external, for that one it returns a pre-generated valid token, which allows loading servers' mod content
 
 Besides, TEK Injector has a special treatment for `-high` command-line argument which will make it run the game with high process priority class.
 
-`-noadmin` command-line argument can be used to start game process without admin privileges (TEK Injector itself must be run with them)
+`-noadmin` command-line argument can be used to start game process without admin privileges (tek-injector.exe itself requires them to do its job)
 
 ## How to use
 

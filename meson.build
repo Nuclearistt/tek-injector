@@ -11,6 +11,7 @@ project(
 executable(
   'tek-injector',
   'main.c',
+  'memscan.cpp',
   'vm-stubs.s',
   import('windows').compile_resources('tek-injector.rc'),
   win_subsystem: 'windows',
