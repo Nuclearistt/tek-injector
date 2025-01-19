@@ -1,6 +1,6 @@
 //===-- main.c - TEK Injector source code ---------------------------------===//
 //
-// Copyright (c) 2024 Nuclearist
+// Copyright (c) 2024-2025 Nuclearist
 // Part of TEK Injector, under the MIT License
 // See https://github.com/Nuclearistt/tek-injector/blob/main/LICENSE for
 //    license information.
@@ -1187,17 +1187,17 @@ static void show_error_message(enum error_code code) {
       WCHAR messageBuffer[] = {L"Game process exited with code 0x00000000"};
       DWORD value = (code & 0xF0000000) >> 28;
       messageBuffer[32] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0xF0000000) >> 24;
+      value = (code & 0x0F000000) >> 24;
       messageBuffer[33] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0xF0000000) >> 20;
+      value = (code & 0x00F00000) >> 20;
       messageBuffer[34] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0xF0000000) >> 16;
+      value = (code & 0x000F0000) >> 16;
       messageBuffer[35] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0xF0000000) >> 12;
+      value = (code & 0x0000F000) >> 12;
       messageBuffer[36] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0xF0000000) >> 8;
+      value = (code & 0x00000F00) >> 8;
       messageBuffer[37] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0xF0000000) >> 4;
+      value = (code & 0x000000F0) >> 4;
       messageBuffer[38] = (value > 9 ? L'7' : L'0') + value;
       value = code & 0x0000000F;
       messageBuffer[39] = (value > 9 ? L'7' : L'0') + value;
