@@ -171,7 +171,8 @@ static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
     return true;
   case 3:
     *pAppID = 2972680;
-    memcpy(pchName, "ARK Fantastic Tames - Pyromane", sizeof("ARK Fantastic Tames - Pyromane"));
+    memcpy(pchName, "ARK Fantastic Tames - Pyromane",
+           sizeof("ARK Fantastic Tames - Pyromane"));
     return true;
   case 4:
     *pAppID = 3059650;
@@ -570,7 +571,7 @@ SteamInternal_FindOrCreateUserInterface_wrapper(int hSteamUser,
     return &isteam_apps_wrapper;
   } else if (!strcmp(pszVersion, "SteamUser021")) {
     // This interface is only needed to get user Steam ID
-    ((uint64_t * (*)(void *, uint64_t *))((*((void ***)interface))[2]))(
+    ((uint64_t *(*)(void *, uint64_t *))((*((void ***)interface))[2]))(
         interface, &steam_id);
   } else if (!strcmp(pszVersion, "SteamUtils010")) {
     isteam_utils_vtable[0] = vm0_stub;       // GetSecondsSinceAppActive
@@ -832,6 +833,12 @@ static void *EOS_Platform_Create_wrapper(const void *Options) {
   return platform;
 }
 
+static void (*EOS_Platform_Release)(void *Handle);
+static void EOS_Platform_Release_wrapper(void *Handle) {
+  EOS_Platform_Release(Handle);
+  ExitProcess(0);
+}
+
 //===--- Process entry point wrappers -------------------------------------===//
 
 // Substitutes entry point for ArkAscended.exe
@@ -947,6 +954,8 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
         eosSdkModule, "EOS_Platform_GetAuthInterface");
     EOS_Platform_Tick =
         (void *(*)(void *))GetProcAddress(eosSdkModule, "EOS_Platform_Tick");
+    EOS_Platform_Release =
+        (void (*)(void *))GetProcAddress(eosSdkModule, "EOS_Platform_Release");
     // Search import name table for EOS_Connect_CopyProductUserInfo
     nameImportsBase =
         (const uint64_t *)(moduleBase + delayDesc->ImportNameTableRVA);
@@ -979,6 +988,16 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
     // Use the index to get function pointer from IAT and write wrapper address
     ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
         EOS_Platform_Create_wrapper;
+    // Search import name table for EOS_Platform_Release
+    index = 0;
+    while (strcmp(
+        ((const IMAGE_IMPORT_BY_NAME *)(moduleBase + nameImportsBase[index]))
+            ->Name,
+        "EOS_Platform_Release"))
+      index++;
+    // Use the index to get function pointer from IAT and write wrapper address
+    ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
+        EOS_Platform_Release_wrapper;
   }
   // Pass execution to actual entry point as if nothing happened
   entryPoint(__readgsqword(0x60)); // Set PEB as the argument
@@ -1066,7 +1085,7 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
   // Get user Steam ID
   void *const iSteamUser =
       ((void *(*)())GetProcAddress(steamApiModule, "SteamUser"))();
-  ((uint64_t * (*)(void *, uint64_t *))((*((void ***)iSteamUser))[2]))(
+  ((uint64_t *(*)(void *, uint64_t *))((*((void ***)iSteamUser))[2]))(
       iSteamUser, &steam_id);
   // Pass execution to actual entry point as if nothing happened
   entryPoint(__readgsqword(0x60)); // Set PEB as the argument
@@ -1331,4 +1350,3 @@ void __declspec(noreturn) entry() {
     show_error_message(result);
   ExitProcess(result);
 }
-
