@@ -192,6 +192,7 @@ static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
   case 7:
     *pAppID = 3483400;
     memcpy(pchName, "ARK: Astraeos", sizeof("ARK: Astraeos"));
+    return true;
   default:
     return false;
   }
