@@ -59,7 +59,7 @@
 #define NOPROFILER
 #define NODEFERWINDOWPOS
 #define NOMCX
-#include <Windows.h>
+#include <windows.h>
 #include <shellapi.h>
 
 //===- TEK Injector error codes -------------------------------------------===//
@@ -391,30 +391,30 @@ static uint32_t ase_get_app_id() { return 346110; }
 static void *(*SteamApps)();
 static void *SteamApps_wrapper() {
   if (!isteam_apps_wrapper.original_interface) {
-    isteam_apps_vtable[0] = return_true;    // BIsSubscribed
-    isteam_apps_vtable[1] = vm1_stub;       // BIsLowViolence
-    isteam_apps_vtable[2] = vm2_stub;       // BIsCybercafe
-    isteam_apps_vtable[3] = vm3_stub;       // BIsVACBanned
-    isteam_apps_vtable[4] = vm4_stub;       // GetCurrentGameLanguage
-    isteam_apps_vtable[5] = vm5_stub;       // GetAvailableGameLanguages
-    isteam_apps_vtable[6] = return_true;    // BIsSubscribedApp
-    isteam_apps_vtable[7] = return_true;    // BIsDlcInstalled
-    isteam_apps_vtable[8] = vm8_stub;       // GetEarliestPurchaseUnixTime
-    isteam_apps_vtable[9] = vm9_stub;       // BIsSubscribedFromFreeWeekend
-    isteam_apps_vtable[10] = vm10_stub;     // GetDLCCount
-    isteam_apps_vtable[11] = vm11_stub;     // BGetDLCDataByIndex
-    isteam_apps_vtable[12] = vm12_stub;     // InstallDLC
-    isteam_apps_vtable[13] = vm13_stub;     // UninstallDLC
-    isteam_apps_vtable[14] = vm14_stub;     // RequestAppProofOfPurchaseKey
-    isteam_apps_vtable[15] = vm15_stub;     // GetCurrentBetaName
-    isteam_apps_vtable[16] = vm16_stub;     // MarkContentCorrupt
-    isteam_apps_vtable[17] = vm17_stub;     // GetInstalledDepots
-    isteam_apps_vtable[18] = vm18_stub;     // GetAppInstallDir
-    isteam_apps_vtable[19] = vm19_stub;     // BIsAppInstalled
-    isteam_apps_vtable[20] = get_app_owner; // GetAppOwner
-    isteam_apps_vtable[21] = vm21_stub;     // GetLaunchQueryParam
-    isteam_apps_vtable[22] = vm22_stub;     // GetDlcDownloadProgress
-    isteam_apps_vtable[23] = vm23_stub;     // GetAppBuildId
+    isteam_apps_vtable[0] = (void *)return_true; // BIsSubscribed
+    isteam_apps_vtable[1] = (void *)vm1_stub;    // BIsLowViolence
+    isteam_apps_vtable[2] = (void *)vm2_stub;    // BIsCybercafe
+    isteam_apps_vtable[3] = (void *)vm3_stub;    // BIsVACBanned
+    isteam_apps_vtable[4] = (void *)vm4_stub;    // GetCurrentGameLanguage
+    isteam_apps_vtable[5] = (void *)vm5_stub;    // GetAvailableGameLanguages
+    isteam_apps_vtable[6] = (void *)return_true; // BIsSubscribedApp
+    isteam_apps_vtable[7] = (void *)return_true; // BIsDlcInstalled
+    isteam_apps_vtable[8] = (void *)vm8_stub;    // GetEarliestPurchaseUnixTime
+    isteam_apps_vtable[9] = (void *)vm9_stub;    // BIsSubscribedFromFreeWeekend
+    isteam_apps_vtable[10] = (void *)vm10_stub;  // GetDLCCount
+    isteam_apps_vtable[11] = (void *)vm11_stub;  // BGetDLCDataByIndex
+    isteam_apps_vtable[12] = (void *)vm12_stub;  // InstallDLC
+    isteam_apps_vtable[13] = (void *)vm13_stub;  // UninstallDLC
+    isteam_apps_vtable[14] = (void *)vm14_stub;  // RequestAppProofOfPurchaseKey
+    isteam_apps_vtable[15] = (void *)vm15_stub;  // GetCurrentBetaName
+    isteam_apps_vtable[16] = (void *)vm16_stub;  // MarkContentCorrupt
+    isteam_apps_vtable[17] = (void *)vm17_stub;  // GetInstalledDepots
+    isteam_apps_vtable[18] = (void *)vm18_stub;  // GetAppInstallDir
+    isteam_apps_vtable[19] = (void *)vm19_stub;  // BIsAppInstalled
+    isteam_apps_vtable[20] = (void *)get_app_owner; // GetAppOwner
+    isteam_apps_vtable[21] = (void *)vm21_stub;     // GetLaunchQueryParam
+    isteam_apps_vtable[22] = (void *)vm22_stub;     // GetDlcDownloadProgress
+    isteam_apps_vtable[23] = (void *)vm23_stub;     // GetAppBuildId
     isteam_apps_wrapper.vtable = isteam_apps_vtable;
     isteam_apps_wrapper.original_interface = SteamApps();
   }
@@ -425,29 +425,33 @@ static void *SteamApps_wrapper() {
 static void *(*SteamMatchmakingServers)();
 static void *SteamMatchmakingServers_wrapper() {
   if (!isteam_matchmaking_servers_wrapper.original_interface) {
-    server_rules_callback_wrapper_vtable[0] = rules_responded;
-    server_rules_callback_wrapper_vtable[1] = rules_failed_to_respond;
-    server_rules_callback_wrapper_vtable[2] = rules_refresh_complete;
+    server_rules_callback_wrapper_vtable[0] = (void *)rules_responded;
+    server_rules_callback_wrapper_vtable[1] = (void *)rules_failed_to_respond;
+    server_rules_callback_wrapper_vtable[2] = (void *)rules_refresh_complete;
     isteam_matchmaking_servers_vtable[0] =
-        request_internet_server_list; // RequestInternetServerList
-    isteam_matchmaking_servers_vtable[1] = vm1_stub; // RequestLANServerList
-    isteam_matchmaking_servers_vtable[2] = vm2_stub; // RequestFriendsServerList
+        (void *)request_internet_server_list; // RequestInternetServerList
+    isteam_matchmaking_servers_vtable[1] =
+        (void *)vm1_stub; // RequestLANServerList
+    isteam_matchmaking_servers_vtable[2] =
+        (void *)vm2_stub; // RequestFriendsServerList
     isteam_matchmaking_servers_vtable[3] =
-        vm3_stub; // RequestFavoritesServerList
-    isteam_matchmaking_servers_vtable[4] = vm4_stub; // RequestHistoryServerList
+        (void *)vm3_stub; // RequestFavoritesServerList
+    isteam_matchmaking_servers_vtable[4] =
+        (void *)vm4_stub; // RequestHistoryServerList
     isteam_matchmaking_servers_vtable[5] =
-        vm5_stub; // RequestSpectatorServerList
-    isteam_matchmaking_servers_vtable[6] = vm6_stub;      // ReleaseRequest
-    isteam_matchmaking_servers_vtable[7] = vm7_stub;      // GetServerDetails
-    isteam_matchmaking_servers_vtable[8] = vm8_stub;      // CancelQuery
-    isteam_matchmaking_servers_vtable[9] = vm9_stub;      // RefreshQuery
-    isteam_matchmaking_servers_vtable[10] = vm10_stub;    // IsRefreshing
-    isteam_matchmaking_servers_vtable[11] = vm11_stub;    // GetServerCount
-    isteam_matchmaking_servers_vtable[12] = vm12_stub;    // RefreshServer
-    isteam_matchmaking_servers_vtable[13] = vm13_stub;    // PingServer
-    isteam_matchmaking_servers_vtable[14] = vm14_stub;    // PlayerDetails
-    isteam_matchmaking_servers_vtable[15] = server_rules; // ServerRules
-    isteam_matchmaking_servers_vtable[16] = vm16_stub;    // CancelServerQuery
+        (void *)vm5_stub; // RequestSpectatorServerList
+    isteam_matchmaking_servers_vtable[6] = (void *)vm6_stub; // ReleaseRequest
+    isteam_matchmaking_servers_vtable[7] = (void *)vm7_stub; // GetServerDetails
+    isteam_matchmaking_servers_vtable[8] = (void *)vm8_stub; // CancelQuery
+    isteam_matchmaking_servers_vtable[9] = (void *)vm9_stub; // RefreshQuery
+    isteam_matchmaking_servers_vtable[10] = (void *)vm10_stub; // IsRefreshing
+    isteam_matchmaking_servers_vtable[11] = (void *)vm11_stub; // GetServerCount
+    isteam_matchmaking_servers_vtable[12] = (void *)vm12_stub; // RefreshServer
+    isteam_matchmaking_servers_vtable[13] = (void *)vm13_stub; // PingServer
+    isteam_matchmaking_servers_vtable[14] = (void *)vm14_stub; // PlayerDetails
+    isteam_matchmaking_servers_vtable[15] = (void *)server_rules; // ServerRules
+    isteam_matchmaking_servers_vtable[16] =
+        (void *)vm16_stub; // CancelServerQuery
     isteam_matchmaking_servers_wrapper.vtable =
         isteam_matchmaking_servers_vtable;
     isteam_matchmaking_servers_wrapper.original_interface =
@@ -460,37 +464,38 @@ static void *SteamMatchmakingServers_wrapper() {
 static void *(*SteamUGC)();
 static void *SteamUGC_wrapper() {
   if (!isteam_ugc_wrapper.original_interface) {
-    isteam_ugc_vtable[0] = vm0_stub;   // CreateQueryUserUGCRequest
-    isteam_ugc_vtable[1] = vm1_stub;   // CreateQueryAllUGCRequest
-    isteam_ugc_vtable[2] = vm2_stub;   // SendQueryUGCRequest
-    isteam_ugc_vtable[3] = vm3_stub;   // GetQueryUGCResult
-    isteam_ugc_vtable[4] = vm4_stub;   // ReleaseQueryUGCRequest
-    isteam_ugc_vtable[5] = vm5_stub;   // AddRequiredTag
-    isteam_ugc_vtable[6] = vm6_stub;   // AddExcludedTag
-    isteam_ugc_vtable[7] = vm7_stub;   // SetReturnLongDescription
-    isteam_ugc_vtable[8] = vm8_stub;   // SetReturnTotalOnly
-    isteam_ugc_vtable[9] = vm9_stub;   // SetAllowCachedResponse
-    isteam_ugc_vtable[10] = vm10_stub; // SetCloudFileNameFilter
-    isteam_ugc_vtable[11] = vm11_stub; // SetMatchAnyTag
-    isteam_ugc_vtable[12] = vm12_stub; // SetSearchText
-    isteam_ugc_vtable[13] = vm13_stub; // SetRankedByTrendDays
-    isteam_ugc_vtable[14] = vm14_stub; // RequestUGCDetails
-    isteam_ugc_vtable[15] = vm15_stub; // CreateItem
-    isteam_ugc_vtable[16] = vm16_stub; // StartItemUpdate
-    isteam_ugc_vtable[17] = vm17_stub; // SetItemTitle
-    isteam_ugc_vtable[18] = vm18_stub; // SetItemDescription
-    isteam_ugc_vtable[19] = vm19_stub; // SetItemVisibility
-    isteam_ugc_vtable[20] = vm20_stub; // SetItemTags
-    isteam_ugc_vtable[21] = vm21_stub; // SetItemContent
-    isteam_ugc_vtable[22] = vm22_stub; // SetItemPreview
-    isteam_ugc_vtable[23] = vm23_stub; // SubmitItemUpdate
-    isteam_ugc_vtable[24] = vm24_stub; // GetItemUpdateProgress
-    isteam_ugc_vtable[25] = vm25_stub; // SubscribeItem
-    isteam_ugc_vtable[26] = vm26_stub; // UnsubscribeItem
-    isteam_ugc_vtable[27] = get_num_subscribed_items; // GetNumSubscribedItems
-    isteam_ugc_vtable[28] = get_subscribed_items;     // GetSubscribedItems
-    isteam_ugc_vtable[29] = get_item_install_info;    // GetItemInstallInfo
-    isteam_ugc_vtable[30] = vm30_stub;                // GetItemUpdateInfo
+    isteam_ugc_vtable[0] = (void *)vm0_stub;   // CreateQueryUserUGCRequest
+    isteam_ugc_vtable[1] = (void *)vm1_stub;   // CreateQueryAllUGCRequest
+    isteam_ugc_vtable[2] = (void *)vm2_stub;   // SendQueryUGCRequest
+    isteam_ugc_vtable[3] = (void *)vm3_stub;   // GetQueryUGCResult
+    isteam_ugc_vtable[4] = (void *)vm4_stub;   // ReleaseQueryUGCRequest
+    isteam_ugc_vtable[5] = (void *)vm5_stub;   // AddRequiredTag
+    isteam_ugc_vtable[6] = (void *)vm6_stub;   // AddExcludedTag
+    isteam_ugc_vtable[7] = (void *)vm7_stub;   // SetReturnLongDescription
+    isteam_ugc_vtable[8] = (void *)vm8_stub;   // SetReturnTotalOnly
+    isteam_ugc_vtable[9] = (void *)vm9_stub;   // SetAllowCachedResponse
+    isteam_ugc_vtable[10] = (void *)vm10_stub; // SetCloudFileNameFilter
+    isteam_ugc_vtable[11] = (void *)vm11_stub; // SetMatchAnyTag
+    isteam_ugc_vtable[12] = (void *)vm12_stub; // SetSearchText
+    isteam_ugc_vtable[13] = (void *)vm13_stub; // SetRankedByTrendDays
+    isteam_ugc_vtable[14] = (void *)vm14_stub; // RequestUGCDetails
+    isteam_ugc_vtable[15] = (void *)vm15_stub; // CreateItem
+    isteam_ugc_vtable[16] = (void *)vm16_stub; // StartItemUpdate
+    isteam_ugc_vtable[17] = (void *)vm17_stub; // SetItemTitle
+    isteam_ugc_vtable[18] = (void *)vm18_stub; // SetItemDescription
+    isteam_ugc_vtable[19] = (void *)vm19_stub; // SetItemVisibility
+    isteam_ugc_vtable[20] = (void *)vm20_stub; // SetItemTags
+    isteam_ugc_vtable[21] = (void *)vm21_stub; // SetItemContent
+    isteam_ugc_vtable[22] = (void *)vm22_stub; // SetItemPreview
+    isteam_ugc_vtable[23] = (void *)vm23_stub; // SubmitItemUpdate
+    isteam_ugc_vtable[24] = (void *)vm24_stub; // GetItemUpdateProgress
+    isteam_ugc_vtable[25] = (void *)vm25_stub; // SubscribeItem
+    isteam_ugc_vtable[26] = (void *)vm26_stub; // UnsubscribeItem
+    isteam_ugc_vtable[27] =
+        (void *)get_num_subscribed_items; // GetNumSubscribedItems
+    isteam_ugc_vtable[28] = (void *)get_subscribed_items;  // GetSubscribedItems
+    isteam_ugc_vtable[29] = (void *)get_item_install_info; // GetItemInstallInfo
+    isteam_ugc_vtable[30] = (void *)vm30_stub;             // GetItemUpdateInfo
     isteam_ugc_wrapper.vtable = isteam_ugc_vtable;
     isteam_ugc_wrapper.original_interface = SteamUGC();
   }
@@ -501,31 +506,32 @@ static void *SteamUGC_wrapper() {
 static void *(*SteamUtils)();
 static void *SteamUtils_wrapper() {
   if (!isteam_utils_wrapper.original_interface) {
-    isteam_utils_vtable[0] = vm0_stub;       // GetSecondsSinceAppActive
-    isteam_utils_vtable[1] = vm1_stub;       // GetSecondsSinceComputerActive
-    isteam_utils_vtable[2] = vm2_stub;       // GetConnectedUniverse
-    isteam_utils_vtable[3] = vm3_stub;       // GetServerRealTime
-    isteam_utils_vtable[4] = vm4_stub;       // GetIPCountry
-    isteam_utils_vtable[5] = vm5_stub;       // GetImageSize
-    isteam_utils_vtable[6] = vm6_stub;       // GetImageRGBA
-    isteam_utils_vtable[7] = vm7_stub;       // GetCSERIPPort
-    isteam_utils_vtable[8] = vm8_stub;       // GetCurrentBatteryPower
-    isteam_utils_vtable[9] = ase_get_app_id; // GetAppID
-    isteam_utils_vtable[10] = vm10_stub;     // SetOverlayNotificationPosition
-    isteam_utils_vtable[11] = vm11_stub;     // IsAPICallCompleted
-    isteam_utils_vtable[12] = vm12_stub;     // GetAPICallFailureReason
-    isteam_utils_vtable[13] = vm13_stub;     // GetAPICallResult
-    isteam_utils_vtable[14] = vm14_stub;     // RunFrame
-    isteam_utils_vtable[15] = vm15_stub;     // GetIPCCallCount
-    isteam_utils_vtable[16] = vm16_stub;     // SetWarningMessageHook
-    isteam_utils_vtable[17] = vm17_stub;     // IsOverlayEnabled
-    isteam_utils_vtable[18] = vm18_stub;     // BOverlayNeedsPresent
-    isteam_utils_vtable[19] = vm19_stub;     // CheckFileSignature
-    isteam_utils_vtable[20] = vm20_stub;     // ShowGamepadTextInput
-    isteam_utils_vtable[21] = vm21_stub;     // GetEnteredGamepadTextLength
-    isteam_utils_vtable[22] = vm22_stub;     // GetEnteredGamepadTextInput
-    isteam_utils_vtable[23] = vm23_stub;     // GetSteamUILanguage
-    isteam_utils_vtable[24] = vm24_stub;     // IsSteamRunningInVR
+    isteam_utils_vtable[0] = (void *)vm0_stub; // GetSecondsSinceAppActive
+    isteam_utils_vtable[1] = (void *)vm1_stub; // GetSecondsSinceComputerActive
+    isteam_utils_vtable[2] = (void *)vm2_stub; // GetConnectedUniverse
+    isteam_utils_vtable[3] = (void *)vm3_stub; // GetServerRealTime
+    isteam_utils_vtable[4] = (void *)vm4_stub; // GetIPCountry
+    isteam_utils_vtable[5] = (void *)vm5_stub; // GetImageSize
+    isteam_utils_vtable[6] = (void *)vm6_stub; // GetImageRGBA
+    isteam_utils_vtable[7] = (void *)vm7_stub; // GetCSERIPPort
+    isteam_utils_vtable[8] = (void *)vm8_stub; // GetCurrentBatteryPower
+    isteam_utils_vtable[9] = (void *)ase_get_app_id; // GetAppID
+    isteam_utils_vtable[10] =
+        (void *)vm10_stub; // SetOverlayNotificationPosition
+    isteam_utils_vtable[11] = (void *)vm11_stub; // IsAPICallCompleted
+    isteam_utils_vtable[12] = (void *)vm12_stub; // GetAPICallFailureReason
+    isteam_utils_vtable[13] = (void *)vm13_stub; // GetAPICallResult
+    isteam_utils_vtable[14] = (void *)vm14_stub; // RunFrame
+    isteam_utils_vtable[15] = (void *)vm15_stub; // GetIPCCallCount
+    isteam_utils_vtable[16] = (void *)vm16_stub; // SetWarningMessageHook
+    isteam_utils_vtable[17] = (void *)vm17_stub; // IsOverlayEnabled
+    isteam_utils_vtable[18] = (void *)vm18_stub; // BOverlayNeedsPresent
+    isteam_utils_vtable[19] = (void *)vm19_stub; // CheckFileSignature
+    isteam_utils_vtable[20] = (void *)vm20_stub; // ShowGamepadTextInput
+    isteam_utils_vtable[21] = (void *)vm21_stub; // GetEnteredGamepadTextLength
+    isteam_utils_vtable[22] = (void *)vm22_stub; // GetEnteredGamepadTextInput
+    isteam_utils_vtable[23] = (void *)vm23_stub; // GetSteamUILanguage
+    isteam_utils_vtable[24] = (void *)vm24_stub; // IsSteamRunningInVR
     isteam_utils_wrapper.vtable = isteam_utils_vtable;
     isteam_utils_wrapper.original_interface = SteamUtils();
   }
@@ -541,35 +547,37 @@ SteamInternal_FindOrCreateUserInterface_wrapper(int hSteamUser,
   void *interface =
       SteamInternal_FindOrCreateUserInterface(hSteamUser, pszVersion);
   if (!strcmp(pszVersion, "STEAMAPPS_INTERFACE_VERSION008")) {
-    isteam_apps_vtable[0] = return_true;        // BIsSubscribed
-    isteam_apps_vtable[1] = vm1_stub;           // BIsLowViolence
-    isteam_apps_vtable[2] = vm2_stub;           // BIsCybercafe
-    isteam_apps_vtable[3] = vm3_stub;           // BIsVACBanned
-    isteam_apps_vtable[4] = vm4_stub;           // GetCurrentGameLanguage
-    isteam_apps_vtable[5] = vm5_stub;           // GetAvailableGameLanguages
-    isteam_apps_vtable[6] = return_true;        // BIsSubscribedApp
-    isteam_apps_vtable[7] = return_true;        // BIsDlcInstalled
-    isteam_apps_vtable[8] = vm8_stub;           // GetEarliestPurchaseUnixTime
-    isteam_apps_vtable[9] = vm9_stub;           // BIsSubscribedFromFreeWeekend
-    isteam_apps_vtable[10] = asa_get_dlc_count; // GetDLCCount
-    isteam_apps_vtable[11] = asa_get_dlc_data_by_index; // BGetDLCDataByIndex
-    isteam_apps_vtable[12] = vm12_stub;                 // InstallDLC
-    isteam_apps_vtable[13] = vm13_stub;                 // UninstallDLC
-    isteam_apps_vtable[14] = vm14_stub;     // RequestAppProofOfPurchaseKey
-    isteam_apps_vtable[15] = vm15_stub;     // GetCurrentBetaName
-    isteam_apps_vtable[16] = vm16_stub;     // MarkContentCorrupt
-    isteam_apps_vtable[17] = vm17_stub;     // GetInstalledDepots
-    isteam_apps_vtable[18] = vm18_stub;     // GetAppInstallDir
-    isteam_apps_vtable[19] = vm19_stub;     // BIsAppInstalled
-    isteam_apps_vtable[20] = get_app_owner; // GetAppOwner
-    isteam_apps_vtable[21] = vm21_stub;     // GetLaunchQueryParam
-    isteam_apps_vtable[22] = vm22_stub;     // GetDlcDownloadProgress
-    isteam_apps_vtable[23] = vm23_stub;     // GetAppBuildId
-    isteam_apps_vtable[24] = vm24_stub;     // RequestAllProofOfPurchaseKeys
-    isteam_apps_vtable[25] = vm25_stub;     // GetFileDetails
-    isteam_apps_vtable[26] = vm26_stub;     // GetLaunchCommandLine
-    isteam_apps_vtable[27] = vm27_stub;     // BIsSubscribedFromFamilySharing
-    isteam_apps_vtable[28] = vm28_stub;     // BIsTimedTrial
+    isteam_apps_vtable[0] = (void *)return_true; // BIsSubscribed
+    isteam_apps_vtable[1] = (void *)vm1_stub;    // BIsLowViolence
+    isteam_apps_vtable[2] = (void *)vm2_stub;    // BIsCybercafe
+    isteam_apps_vtable[3] = (void *)vm3_stub;    // BIsVACBanned
+    isteam_apps_vtable[4] = (void *)vm4_stub;    // GetCurrentGameLanguage
+    isteam_apps_vtable[5] = (void *)vm5_stub;    // GetAvailableGameLanguages
+    isteam_apps_vtable[6] = (void *)return_true; // BIsSubscribedApp
+    isteam_apps_vtable[7] = (void *)return_true; // BIsDlcInstalled
+    isteam_apps_vtable[8] = (void *)vm8_stub;    // GetEarliestPurchaseUnixTime
+    isteam_apps_vtable[9] = (void *)vm9_stub;    // BIsSubscribedFromFreeWeekend
+    isteam_apps_vtable[10] = (void *)asa_get_dlc_count; // GetDLCCount
+    isteam_apps_vtable[11] =
+        (void *)asa_get_dlc_data_by_index;      // BGetDLCDataByIndex
+    isteam_apps_vtable[12] = (void *)vm12_stub; // InstallDLC
+    isteam_apps_vtable[13] = (void *)vm13_stub; // UninstallDLC
+    isteam_apps_vtable[14] = (void *)vm14_stub; // RequestAppProofOfPurchaseKey
+    isteam_apps_vtable[15] = (void *)vm15_stub; // GetCurrentBetaName
+    isteam_apps_vtable[16] = (void *)vm16_stub; // MarkContentCorrupt
+    isteam_apps_vtable[17] = (void *)vm17_stub; // GetInstalledDepots
+    isteam_apps_vtable[18] = (void *)vm18_stub; // GetAppInstallDir
+    isteam_apps_vtable[19] = (void *)vm19_stub; // BIsAppInstalled
+    isteam_apps_vtable[20] = (void *)get_app_owner; // GetAppOwner
+    isteam_apps_vtable[21] = (void *)vm21_stub;     // GetLaunchQueryParam
+    isteam_apps_vtable[22] = (void *)vm22_stub;     // GetDlcDownloadProgress
+    isteam_apps_vtable[23] = (void *)vm23_stub;     // GetAppBuildId
+    isteam_apps_vtable[24] = (void *)vm24_stub; // RequestAllProofOfPurchaseKeys
+    isteam_apps_vtable[25] = (void *)vm25_stub; // GetFileDetails
+    isteam_apps_vtable[26] = (void *)vm26_stub; // GetLaunchCommandLine
+    isteam_apps_vtable[27] =
+        (void *)vm27_stub; // BIsSubscribedFromFamilySharing
+    isteam_apps_vtable[28] = (void *)vm28_stub; // BIsTimedTrial
     isteam_apps_wrapper.vtable = isteam_apps_vtable;
     isteam_apps_wrapper.original_interface = interface;
     return &isteam_apps_wrapper;
@@ -578,44 +586,46 @@ SteamInternal_FindOrCreateUserInterface_wrapper(int hSteamUser,
     ((uint64_t *(*)(void *, uint64_t *))((*((void ***)interface))[2]))(
         interface, &steam_id);
   } else if (!strcmp(pszVersion, "SteamUtils010")) {
-    isteam_utils_vtable[0] = vm0_stub;       // GetSecondsSinceAppActive
-    isteam_utils_vtable[1] = vm1_stub;       // GetSecondsSinceComputerActive
-    isteam_utils_vtable[2] = vm2_stub;       // GetConnectedUniverse
-    isteam_utils_vtable[3] = vm3_stub;       // GetServerRealTime
-    isteam_utils_vtable[4] = vm4_stub;       // GetIPCountry
-    isteam_utils_vtable[5] = vm5_stub;       // GetImageSize
-    isteam_utils_vtable[6] = vm6_stub;       // GetImageRGBA
-    isteam_utils_vtable[7] = vm7_stub;       // GetCSERIPPort
-    isteam_utils_vtable[8] = vm8_stub;       // GetCurrentBatteryPower
-    isteam_utils_vtable[9] = asa_get_app_id; // GetAppID
-    isteam_utils_vtable[10] = vm10_stub;     // SetOverlayNotificationPosition
-    isteam_utils_vtable[11] = vm11_stub;     // IsAPICallCompleted
-    isteam_utils_vtable[12] = vm12_stub;     // GetAPICallFailureReason
-    isteam_utils_vtable[13] = vm13_stub;     // GetAPICallResult
-    isteam_utils_vtable[14] = vm14_stub;     // RunFrame
-    isteam_utils_vtable[15] = vm15_stub;     // GetIPCCallCount
-    isteam_utils_vtable[16] = vm16_stub;     // SetWarningMessageHook
-    isteam_utils_vtable[17] = vm17_stub;     // IsOverlayEnabled
-    isteam_utils_vtable[18] = vm18_stub;     // BOverlayNeedsPresent
-    isteam_utils_vtable[19] = vm19_stub;     // CheckFileSignature
-    isteam_utils_vtable[20] = vm20_stub;     // ShowGamepadTextInput
-    isteam_utils_vtable[21] = vm21_stub;     // GetEnteredGamepadTextLength
-    isteam_utils_vtable[22] = vm22_stub;     // GetEnteredGamepadTextInput
-    isteam_utils_vtable[23] = vm23_stub;     // GetSteamUILanguage
-    isteam_utils_vtable[24] = vm24_stub;     // IsSteamRunningInVR
-    isteam_utils_vtable[25] = vm25_stub;     // SetOverlayNotificationInset
-    isteam_utils_vtable[26] = vm26_stub;     // IsSteamInBigPictureMode
-    isteam_utils_vtable[27] = vm27_stub;     // StartVRDashboard
-    isteam_utils_vtable[28] = vm28_stub;     // IsVRHeadsetStreamingEnabled
-    isteam_utils_vtable[29] = vm29_stub;     // SetVRHeadsetStreamingEnabled
-    isteam_utils_vtable[30] = vm30_stub;     // IsSteamChinaLauncher
-    isteam_utils_vtable[31] = vm31_stub;     // InitFilterText
-    isteam_utils_vtable[32] = vm32_stub;     // FilterText
-    isteam_utils_vtable[33] = vm33_stub;     // GetIPv6ConnectivityState
-    isteam_utils_vtable[34] = vm34_stub;     // IsSteamRunningOnSteamDeck
-    isteam_utils_vtable[35] = vm35_stub;     // ShowFloatingGamepadTextInput
-    isteam_utils_vtable[36] = vm36_stub;     // SetGameLauncherMode
-    isteam_utils_vtable[37] = vm37_stub;     // DismissFloatingGamepadTextInput
+    isteam_utils_vtable[0] = (void *)vm0_stub; // GetSecondsSinceAppActive
+    isteam_utils_vtable[1] = (void *)vm1_stub; // GetSecondsSinceComputerActive
+    isteam_utils_vtable[2] = (void *)vm2_stub; // GetConnectedUniverse
+    isteam_utils_vtable[3] = (void *)vm3_stub; // GetServerRealTime
+    isteam_utils_vtable[4] = (void *)vm4_stub; // GetIPCountry
+    isteam_utils_vtable[5] = (void *)vm5_stub; // GetImageSize
+    isteam_utils_vtable[6] = (void *)vm6_stub; // GetImageRGBA
+    isteam_utils_vtable[7] = (void *)vm7_stub; // GetCSERIPPort
+    isteam_utils_vtable[8] = (void *)vm8_stub; // GetCurrentBatteryPower
+    isteam_utils_vtable[9] = (void *)asa_get_app_id; // GetAppID
+    isteam_utils_vtable[10] =
+        (void *)vm10_stub; // SetOverlayNotificationPosition
+    isteam_utils_vtable[11] = (void *)vm11_stub; // IsAPICallCompleted
+    isteam_utils_vtable[12] = (void *)vm12_stub; // GetAPICallFailureReason
+    isteam_utils_vtable[13] = (void *)vm13_stub; // GetAPICallResult
+    isteam_utils_vtable[14] = (void *)vm14_stub; // RunFrame
+    isteam_utils_vtable[15] = (void *)vm15_stub; // GetIPCCallCount
+    isteam_utils_vtable[16] = (void *)vm16_stub; // SetWarningMessageHook
+    isteam_utils_vtable[17] = (void *)vm17_stub; // IsOverlayEnabled
+    isteam_utils_vtable[18] = (void *)vm18_stub; // BOverlayNeedsPresent
+    isteam_utils_vtable[19] = (void *)vm19_stub; // CheckFileSignature
+    isteam_utils_vtable[20] = (void *)vm20_stub; // ShowGamepadTextInput
+    isteam_utils_vtable[21] = (void *)vm21_stub; // GetEnteredGamepadTextLength
+    isteam_utils_vtable[22] = (void *)vm22_stub; // GetEnteredGamepadTextInput
+    isteam_utils_vtable[23] = (void *)vm23_stub; // GetSteamUILanguage
+    isteam_utils_vtable[24] = (void *)vm24_stub; // IsSteamRunningInVR
+    isteam_utils_vtable[25] = (void *)vm25_stub; // SetOverlayNotificationInset
+    isteam_utils_vtable[26] = (void *)vm26_stub; // IsSteamInBigPictureMode
+    isteam_utils_vtable[27] = (void *)vm27_stub; // StartVRDashboard
+    isteam_utils_vtable[28] = (void *)vm28_stub; // IsVRHeadsetStreamingEnabled
+    isteam_utils_vtable[29] = (void *)vm29_stub; // SetVRHeadsetStreamingEnabled
+    isteam_utils_vtable[30] = (void *)vm30_stub; // IsSteamChinaLauncher
+    isteam_utils_vtable[31] = (void *)vm31_stub; // InitFilterText
+    isteam_utils_vtable[32] = (void *)vm32_stub; // FilterText
+    isteam_utils_vtable[33] = (void *)vm33_stub; // GetIPv6ConnectivityState
+    isteam_utils_vtable[34] = (void *)vm34_stub; // IsSteamRunningOnSteamDeck
+    isteam_utils_vtable[35] = (void *)vm35_stub; // ShowFloatingGamepadTextInput
+    isteam_utils_vtable[36] = (void *)vm36_stub; // SetGameLauncherMode
+    isteam_utils_vtable[37] =
+        (void *)vm37_stub; // DismissFloatingGamepadTextInput
     isteam_utils_wrapper.vtable = isteam_utils_vtable;
     isteam_utils_wrapper.original_interface = interface;
     return &isteam_utils_wrapper;
@@ -845,9 +855,11 @@ static void EOS_Platform_Release_wrapper(void *Handle) {
 
 //===--- Process entry point wrappers -------------------------------------===//
 
+typedef void (*entry_point_t)(DWORD64);
+
 // Substitutes entry point for ArkAscended.exe
-static void __declspec(noreturn)
-asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
+[[noreturn]]
+static void asa_entry(entry_point_t entryPoint) {
   // Step 1: load steam_api64.dll, find its IAT and call SteamAPI_Init
   // Get image headers
   const uint8_t *const moduleBase = (const uint8_t *)GetModuleHandleW(NULL);
@@ -873,11 +885,12 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
                    L"64\\steam_api64.dll");
   *((HMODULE *)(moduleBase + delayDesc->ModuleHandleRVA)) = steamApiModule;
   // Initialize Steam API
-  if (!((bool (*const)())GetProcAddress(steamApiModule, "SteamAPI_Init"))())
+  if (!((bool (*const)())(void *)GetProcAddress(steamApiModule,
+                                                "SteamAPI_Init"))())
     ExitProcess(GEC_STEAM_API_INIT_FAILED);
   // Step 2: setup SteamInternal_FindOrCreateUserInterface wrapper
   SteamInternal_FindOrCreateUserInterface =
-      (void *(*)(int, const char *))GetProcAddress(
+      (void *(*)(int, const char *))(void *)GetProcAddress(
           steamApiModule, "SteamInternal_FindOrCreateUserInterface");
   // Search import name table for SteamInternal_FindOrCreateUserInterface
   const uint64_t *nameImportsBase =
@@ -890,7 +903,7 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
     index++;
   // Use the index to get function pointer from IAT and write wrapper address
   ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-      SteamInternal_FindOrCreateUserInterface_wrapper;
+      (void *)SteamInternal_FindOrCreateUserInterface_wrapper;
   // Step 3: setup EOS SDK wrappers for Epic Games authentication if necessary
   // GetEnvironmentVariableA returns 4 when app ID is 480 (3 characters + null)
   if (GetEnvironmentVariableA("GameAppId", NULL, 0) == 4) {
@@ -937,29 +950,28 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
         LoadLibraryW(L"RedpointEOS\\EOSSDK-Win64-Shipping.dll");
     *((HMODULE *)(moduleBase + delayDesc->ModuleHandleRVA)) = eosSdkModule;
     // Get all necessary function addresses
-    EOS_Auth_CopyIdToken = (int (*)(
-        void *, const struct EOS_Auth_CopyIdTokenOptions *,
-        struct EOS_Auth_IdToken **))GetProcAddress(eosSdkModule,
-                                                   "EOS_Auth_CopyIdToken");
+    EOS_Auth_CopyIdToken =
+        (int (*)(void *, const struct EOS_Auth_CopyIdTokenOptions *,
+                 struct EOS_Auth_IdToken **))(
+            void *)GetProcAddress(eosSdkModule, "EOS_Auth_CopyIdToken");
     EOS_Auth_Login =
         (void (*)(void *, const struct EOS_Auth_LoginOptions *, void *,
-                  void (*const)(const struct EOS_Auth_LoginCallbackInfo *)))
-            GetProcAddress(eosSdkModule, "EOS_Auth_Login");
+                  void (*const)(const struct EOS_Auth_LoginCallbackInfo *)))(
+            void *)GetProcAddress(eosSdkModule, "EOS_Auth_Login");
     EOS_Connect_CopyProductUserInfo = (int (*)(
-        void *, const void *, struct EOS_Connect_ExternalAccountInfo **))
-        GetProcAddress(eosSdkModule, "EOS_Connect_CopyProductUserInfo");
-    EOS_Connect_Login =
-        (void (*)(void *, const struct EOS_Connect_LoginOptions *, void *,
-                  const void *))GetProcAddress(eosSdkModule,
-                                               "EOS_Connect_Login");
-    EOS_Platform_Create = (void *(*)(const void *))GetProcAddress(
+        void *, const void *, struct EOS_Connect_ExternalAccountInfo **))(
+        void *)GetProcAddress(eosSdkModule, "EOS_Connect_CopyProductUserInfo");
+    EOS_Connect_Login = (void (*)(
+        void *, const struct EOS_Connect_LoginOptions *, void *, const void *))(
+        void *)GetProcAddress(eosSdkModule, "EOS_Connect_Login");
+    EOS_Platform_Create = (void *(*)(const void *))(void *)GetProcAddress(
         eosSdkModule, "EOS_Platform_Create");
-    EOS_Platform_GetAuthInterface = (void *(*)(void *))GetProcAddress(
+    EOS_Platform_GetAuthInterface = (void *(*)(void *))(void *)GetProcAddress(
         eosSdkModule, "EOS_Platform_GetAuthInterface");
-    EOS_Platform_Tick =
-        (void *(*)(void *))GetProcAddress(eosSdkModule, "EOS_Platform_Tick");
-    EOS_Platform_Release =
-        (void (*)(void *))GetProcAddress(eosSdkModule, "EOS_Platform_Release");
+    EOS_Platform_Tick = (void *(*)(void *))(void *)GetProcAddress(
+        eosSdkModule, "EOS_Platform_Tick");
+    EOS_Platform_Release = (void (*)(void *))(void *)GetProcAddress(
+        eosSdkModule, "EOS_Platform_Release");
     // Search import name table for EOS_Connect_CopyProductUserInfo
     nameImportsBase =
         (const uint64_t *)(moduleBase + delayDesc->ImportNameTableRVA);
@@ -971,7 +983,7 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
       index++;
     // Use the index to get function pointer from IAT and write wrapper address
     ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-        EOS_Connect_CopyProductUserInfo_wrapper;
+        (void *)EOS_Connect_CopyProductUserInfo_wrapper;
     // Search import name table for EOS_Connect_Login
     index = 0;
     while (strcmp(
@@ -981,7 +993,7 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
       index++;
     // Use the index to get function pointer from IAT and write wrapper address
     ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-        EOS_Connect_Login_wrapper;
+        (void *)EOS_Connect_Login_wrapper;
     // Search import name table for EOS_Platform_Create
     index = 0;
     while (strcmp(
@@ -991,7 +1003,7 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
       index++;
     // Use the index to get function pointer from IAT and write wrapper address
     ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-        EOS_Platform_Create_wrapper;
+        (void *)EOS_Platform_Create_wrapper;
     // Search import name table for EOS_Platform_Release
     index = 0;
     while (strcmp(
@@ -1001,15 +1013,16 @@ asa_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
       index++;
     // Use the index to get function pointer from IAT and write wrapper address
     ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-        EOS_Platform_Release_wrapper;
+        (void *)EOS_Platform_Release_wrapper;
   }
   // Pass execution to actual entry point as if nothing happened
   entryPoint(__readgsqword(0x60)); // Set PEB as the argument
+  unreachable();
 }
 
 // Substitutes entry point for ShooterGame.exe
-static void __declspec(noreturn)
-ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
+[[noreturn]]
+static void ase_entry(entry_point_t entryPoint) {
   // Step 1: load steam_api64.dll, find its IAT and call SteamAPI_Init
   // Get image headers
   const uint8_t *const moduleBase = (const uint8_t *)GetModuleHandleW(NULL);
@@ -1035,15 +1048,17 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
                    L"64\\steam_api64.dll");
   *((HMODULE *)(moduleBase + delayDesc->ModuleHandleRVA)) = steamApiModule;
   // Initialize Steam API
-  if (!((bool (*const)())GetProcAddress(steamApiModule, "SteamAPI_Init"))())
+  if (!((bool (*const)())(void *)GetProcAddress(steamApiModule,
+                                                "SteamAPI_Init"))())
     ExitProcess(GEC_STEAM_API_INIT_FAILED);
   // Step 2: setup Steam interface accessor wrappers
   // Get all necessary function addresses
-  SteamApps = (void *(*)())GetProcAddress(steamApiModule, "SteamApps");
-  SteamMatchmakingServers =
-      (void *(*)())GetProcAddress(steamApiModule, "SteamMatchmakingServers");
-  SteamUGC = (void *(*)())GetProcAddress(steamApiModule, "SteamUGC");
-  SteamUtils = (void *(*)())GetProcAddress(steamApiModule, "SteamUtils");
+  SteamApps = (void *(*)())(void *)GetProcAddress(steamApiModule, "SteamApps");
+  SteamMatchmakingServers = (void *(*)())(void *)GetProcAddress(
+      steamApiModule, "SteamMatchmakingServers");
+  SteamUGC = (void *(*)())(void *)GetProcAddress(steamApiModule, "SteamUGC");
+  SteamUtils =
+      (void *(*)())(void *)GetProcAddress(steamApiModule, "SteamUtils");
   // Search import name table for SteamApps
   const uint64_t *nameImportsBase =
       (const uint64_t *)(moduleBase + delayDesc->ImportNameTableRVA);
@@ -1055,7 +1070,7 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
     index++;
   // Use the index to get function pointer from IAT and write wrapper address
   ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-      SteamApps_wrapper;
+      (void *)SteamApps_wrapper;
   // Search import name table for SteamMatchmakingServers
   index = 0;
   while (strcmp(
@@ -1065,7 +1080,7 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
     index++;
   // Use the index to get function pointer from IAT and write wrapper address
   ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-      SteamMatchmakingServers_wrapper;
+      (void *)SteamMatchmakingServers_wrapper;
   // Search import name table for SteamUGC
   index = 0;
   while (strcmp(
@@ -1075,7 +1090,7 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
     index++;
   // Use the index to get function pointer from IAT and write wrapper address
   ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-      SteamUGC_wrapper;
+      (void *)SteamUGC_wrapper;
   // Search import name table for SteamUtils
   index = 0;
   while (strcmp(
@@ -1085,21 +1100,24 @@ ase_entry(void __declspec(noreturn) (*entryPoint)(DWORD64)) {
     index++;
   // Use the index to get function pointer from IAT and write wrapper address
   ((void **)(moduleBase + delayDesc->ImportAddressTableRVA))[index] =
-      SteamUtils_wrapper;
+      (void *)SteamUtils_wrapper;
   // Get user Steam ID
   void *const iSteamUser =
-      ((void *(*)())GetProcAddress(steamApiModule, "SteamUser"))();
+      ((void *(*)())(void *)GetProcAddress(steamApiModule, "SteamUser"))();
   ((uint64_t *(*)(void *, uint64_t *))((*((void ***)iSteamUser))[2]))(
       iSteamUser, &steam_id);
   // Pass execution to actual entry point as if nothing happened
   entryPoint(__readgsqword(0x60)); // Set PEB as the argument
+  unreachable();
 }
 
 //===- Host-side functions (called inside injector process) ---------------===//
 
+typedef void (*entry_point_wrapper_t)(entry_point_t);
+
 static enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
                                               const wchar_t **argv,
-                                              const void *entryPoint,
+                                              entry_point_wrapper_t entryPoint,
                                               bool isEmbedded) {
   // Get image size from PE optional header
   uint8_t *const module = (uint8_t *)GetModuleHandleW(NULL);
@@ -1216,7 +1234,7 @@ static enum error_code launch_game_and_inject(LPCWSTR exePath, int argc,
   threadContext.Rdx = threadContext.Rcx;
   // Set RCX to custom entry point address, adjusted for new address space
   threadContext.Rcx =
-      (DWORD64)(entryPoint - (const void *)module + imageRegion);
+      (DWORD64)entryPoint - (DWORD64)module + (DWORD64)imageRegion;
   if (!SetThreadContext(procInfo.hThread, &threadContext)) {
     result = IEC_SET_THREAD_CTX_FAILED;
     goto Exit;
@@ -1248,23 +1266,8 @@ static void show_error_message(enum error_code code) {
       MessageBoxW(NULL, message, L"TEK Injector", MB_ICONERROR);
       LocalFree(message);
     } else {
-      WCHAR messageBuffer[] = {L"Game process exited with code 0x00000000"};
-      DWORD value = (code & 0xF0000000) >> 28;
-      messageBuffer[32] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0x0F000000) >> 24;
-      messageBuffer[33] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0x00F00000) >> 20;
-      messageBuffer[34] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0x000F0000) >> 16;
-      messageBuffer[35] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0x0000F000) >> 12;
-      messageBuffer[36] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0x00000F00) >> 8;
-      messageBuffer[37] = (value > 9 ? L'7' : L'0') + value;
-      value = (code & 0x000000F0) >> 4;
-      messageBuffer[38] = (value > 9 ? L'7' : L'0') + value;
-      value = code & 0x0000000F;
-      messageBuffer[39] = (value > 9 ? L'7' : L'0') + value;
+      WCHAR messageBuffer[41];
+      swprintf(messageBuffer, sizeof messageBuffer / sizeof messageBuffer[0], L"Game process exited with code 0x%08x", code);
       MessageBoxW(NULL, messageBuffer, L"TEK Injector", MB_ICONERROR);
     }
   }
@@ -1276,14 +1279,14 @@ static void show_error_message(enum error_code code) {
 __declspec(dllexport) void launch_asa(const wchar_t *exePath, int argc,
                                       const wchar_t **argv) {
   // Try using original app ID first
-  SetEnvironmentVariableA("SteamAppId", "2399830");
-  SetEnvironmentVariableA("GameAppId", "2399830");
+  SetEnvironmentVariableW(L"SteamAppId", L"2399830");
+  SetEnvironmentVariableW(L"GameAppId", L"2399830");
   enum error_code result =
       launch_game_and_inject(exePath, argc, argv, asa_entry, true);
   if (result == GEC_STEAM_API_INIT_FAILED) {
     // Current Steam user doesn't own the game, fallback to Spacewar
-    SetEnvironmentVariableA("SteamAppId", "480");
-    SetEnvironmentVariableA("GameAppId", "480");
+    SetEnvironmentVariableW(L"SteamAppId", L"480");
+    SetEnvironmentVariableW(L"GameAppId", L"480");
     result = launch_game_and_inject(exePath, argc, argv, asa_entry, true);
   }
   if (result)
@@ -1292,14 +1295,14 @@ __declspec(dllexport) void launch_asa(const wchar_t *exePath, int argc,
 __declspec(dllexport) void launch_ase(const wchar_t *exePath, int argc,
                                       const wchar_t **argv) {
   // Try using original app ID first
-  SetEnvironmentVariableA("SteamAppId", "346110");
-  SetEnvironmentVariableA("GameAppId", "346110");
+  SetEnvironmentVariableW(L"SteamAppId", L"346110");
+  SetEnvironmentVariableW(L"GameAppId", L"346110");
   enum error_code result =
       launch_game_and_inject(exePath, argc, argv, ase_entry, true);
   if (result == GEC_STEAM_API_INIT_FAILED) {
     // Current Steam user doesn't own the game, fallback to Spacewar
-    SetEnvironmentVariableA("SteamAppId", "480");
-    SetEnvironmentVariableA("GameAppId", "480");
+    SetEnvironmentVariableW(L"SteamAppId", L"480");
+    SetEnvironmentVariableW(L"GameAppId", L"480");
     result = launch_game_and_inject(exePath, argc, argv, ase_entry, true);
   }
   if (result)
@@ -1307,23 +1310,20 @@ __declspec(dllexport) void launch_ase(const wchar_t *exePath, int argc,
 }
 
 // Main entry point used when running standalone tek-injector.exe
-void __declspec(noreturn) entry() {
+int main(void) {
   LPCWSTR gameExe;
-  const void *entryPoint;
-  LPCSTR appId;
+  entry_point_wrapper_t entryPoint;
+  LPCWSTR appId;
   // Check if ArkAscended.exe or ShooterGame.exe is present in current directory
-  // For some odd reason using GetFileAttributesW breaks created game process,
-  //    so have to use Ex variant
-  WIN32_FILE_ATTRIBUTE_DATA attr;
-  if (GetFileAttributesExW(L"ArkAscended.exe", GetFileExInfoStandard, &attr)) {
+  if (GetFileAttributesW(L"ArkAscended.exe") != INVALID_FILE_ATTRIBUTES) {
     gameExe = L"ArkAscended.exe";
     entryPoint = asa_entry;
-    appId = "2399830";
-  } else if (GetFileAttributesExW(L"ShooterGame.exe", GetFileExInfoStandard,
-                                  &attr)) {
+    appId = L"2399830";
+  } else if (GetFileAttributesW(L"ShooterGame.exe") !=
+             INVALID_FILE_ATTRIBUTES) {
     gameExe = L"ShooterGame.exe";
     entryPoint = ase_entry;
-    appId = "346110";
+    appId = L"346110";
   } else {
     MessageBoxW(NULL,
                 L"Neither ArkAscended.exe nor ShooterGame.exe was found in "
@@ -1338,19 +1338,19 @@ void __declspec(noreturn) entry() {
     argc = 1; // Just a safety check so code below doesn't get broken
   // Launch the game
   // Try using original app ID first
-  SetEnvironmentVariableA("SteamAppId", appId);
-  SetEnvironmentVariableA("GameAppId", appId);
+  SetEnvironmentVariableW(L"SteamAppId", appId);
+  SetEnvironmentVariableW(L"GameAppId", appId);
   enum error_code result =
       launch_game_and_inject(gameExe, argc - 1, argv + 1, entryPoint, false);
   if (result == GEC_STEAM_API_INIT_FAILED) {
     // Current Steam user doesn't own the game, fallback to Spacewar
-    SetEnvironmentVariableA("SteamAppId", "480");
-    SetEnvironmentVariableA("GameAppId", "480");
+    SetEnvironmentVariableW(L"SteamAppId", L"480");
+    SetEnvironmentVariableW(L"GameAppId", L"480");
     result =
         launch_game_and_inject(gameExe, argc - 1, argv + 1, entryPoint, false);
   }
   LocalFree(argv);
   if (result)
     show_error_message(result);
-  ExitProcess(result);
+  return result;
 }

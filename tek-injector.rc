@@ -1,12 +1,14 @@
 #define APSTUDIO_READONLY_SYMBOLS
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include <Windows.h>
+#include <winuser.h>
 #undef APSTUDIO_HIDDEN_SYMBOLS
 #undef APSTUDIO_READONLY_SYMBOLS
 
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "tek-injector.manifest"
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,1,3,0
-PRODUCTVERSION  1,1,3,0
+FILEVERSION     1,2,0,0
+PRODUCTVERSION  1,2,0,0
 FILEFLAGSMASK   0
 FILEFLAGS       0
 FILEOS          VOS_NT
@@ -18,13 +20,13 @@ BEGIN
     BLOCK "00000000"
     BEGIN
       VALUE "CompanyName", "Nuclearist"
-      VALUE "FileDescription", "Custom code injector for ARK games"
-      VALUE "FileVersion", "1.1.3"
+      VALUE "FileDescription", "TEK Injector"
+      VALUE "FileVersion", "1.2.0"
       VALUE "InternalName", "tek-injector"
       VALUE "LegalCopyright", "Copyright (c) 2024-2025 Nuclearist"
       VALUE "OriginalFilename", "tek-injector.exe"
       VALUE "ProductName", "TEK Injector"
-      VALUE "ProductVersion", "1.1.3"
+      VALUE "ProductVersion", "1.2.0"
     END
   END
   BLOCK "VarFileInfo"
