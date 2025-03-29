@@ -866,6 +866,33 @@ static void asa_entry(entry_point_t entryPoint) {
   const IMAGE_NT_HEADERS64 *const ntHeaders =
       (const IMAGE_NT_HEADERS64
            *)(moduleBase + ((const IMAGE_DOS_HEADER *)moduleBase)->e_lfanew);
+  // Find string L"api.curseforge.com" in the .rdata section and replace it
+  // with L"apiw.nuclearist.ru", which will handle external authentication
+  // for CF API and allow loading mod content for servers if app id is 480
+  const int numSections = ntHeaders->FileHeader.NumberOfSections;
+  const IMAGE_SECTION_HEADER *const sections =
+      (const IMAGE_SECTION_HEADER *)(ntHeaders + 1);
+  for (int i = 0; i < numSections; ++i) {
+    const IMAGE_SECTION_HEADER *const section = sections + i;
+    if (strncmp((const char *)section->Name, ".rdata", sizeof section->Name)) {
+      continue;
+    }
+    const uint8_t *const rdataBase = moduleBase + section->VirtualAddress;
+    const size_t strPos = memscan(rdataBase, section->Misc.VirtualSize,
+                                  L"api.curseforge.com", 36);
+    if (strPos == SIZE_MAX) {
+      ExitProcess(GEC_CFAPI_URL_NOT_FOUND);
+    }
+    char *const strAddr = (char *)rdataBase + strPos;
+    MEMORY_BASIC_INFORMATION mbi;
+    VirtualQuery(strAddr, &mbi, sizeof mbi);
+    DWORD oldProtect;
+    VirtualProtect(mbi.BaseAddress, mbi.RegionSize, PAGE_READWRITE,
+                   &oldProtect);
+    memcpy(strAddr, L"apiw.nuclearist.ru", 36);
+    VirtualProtect(mbi.BaseAddress, mbi.RegionSize, mbi.Protect, &oldProtect);
+    break;
+  }
   const IMAGE_DELAYLOAD_DESCRIPTOR *const delayDescBase =
       (const IMAGE_DELAYLOAD_DESCRIPTOR
            *)(moduleBase +
@@ -907,38 +934,6 @@ static void asa_entry(entry_point_t entryPoint) {
   // Step 3: setup EOS SDK wrappers for Epic Games authentication if necessary
   // GetEnvironmentVariableA returns 4 when app ID is 480 (3 characters + null)
   if (GetEnvironmentVariableA("GameAppId", NULL, 0) == 4) {
-    // Find string L"api.curseforge.com" in the .rdata section and replace it
-    // with L"apiw.nuclearist.ru", which will handle external authentication
-    // for CF API and allow loading mod content for servers
-    const char *const asaModule = (const char *)GetModuleHandleW(NULL);
-    const IMAGE_NT_HEADERS64 *const ntHeaders =
-        (const IMAGE_NT_HEADERS64
-             *)(asaModule + ((const IMAGE_DOS_HEADER *)asaModule)->e_lfanew);
-    const int numSections = ntHeaders->FileHeader.NumberOfSections;
-    const IMAGE_SECTION_HEADER *const sections =
-        (const IMAGE_SECTION_HEADER *)(ntHeaders + 1);
-    for (int i = 0; i < numSections; ++i) {
-      const IMAGE_SECTION_HEADER *const section = sections + i;
-      if (strncmp((const char *)section->Name, ".rdata",
-                  sizeof section->Name)) {
-        continue;
-      }
-      const char *const rdataBase = asaModule + section->VirtualAddress;
-      const size_t strPos = memscan(rdataBase, section->Misc.VirtualSize,
-                                    L"api.curseforge.com", 36);
-      if (strPos == SIZE_MAX) {
-        ExitProcess(GEC_CFAPI_URL_NOT_FOUND);
-      }
-      char *const strAddr = (char *)rdataBase + strPos;
-      MEMORY_BASIC_INFORMATION mbi;
-      VirtualQuery(strAddr, &mbi, sizeof mbi);
-      DWORD oldProtect;
-      VirtualProtect(mbi.BaseAddress, mbi.RegionSize, PAGE_READWRITE,
-                     &oldProtect);
-      memcpy(strAddr, L"apiw.nuclearist.ru", 36);
-      VirtualProtect(mbi.BaseAddress, mbi.RegionSize, mbi.Protect, &oldProtect);
-      break;
-    }
     // Find delay import descriptor for EOSSDK-Win64-Shipping.dll
     delayDesc = delayDescBase;
     while (strcmp((const char *)(moduleBase + delayDesc->DllNameRVA),
@@ -1267,7 +1262,8 @@ static void show_error_message(enum error_code code) {
       LocalFree(message);
     } else {
       WCHAR messageBuffer[41];
-      swprintf(messageBuffer, sizeof messageBuffer / sizeof messageBuffer[0], L"Game process exited with code 0x%08x", code);
+      swprintf(messageBuffer, sizeof messageBuffer / sizeof messageBuffer[0],
+               L"Game process exited with code 0x%08x", code);
       MessageBoxW(NULL, messageBuffer, L"TEK Injector", MB_ICONERROR);
     }
   }
