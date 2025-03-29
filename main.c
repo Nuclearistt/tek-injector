@@ -149,7 +149,7 @@ static void *isteam_apps_vtable[29];
 static struct cpp_interface_wrapper isteam_apps_wrapper;
 
 static bool return_true() { return true; }
-static int asa_get_dlc_count() { return 8; }
+static int asa_get_dlc_count() { return 10; }
 static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
                                       uint32_t *pAppID, bool *pbAvailable,
                                       char *pchName) {
@@ -192,6 +192,15 @@ static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
   case 7:
     *pAppID = 3483400;
     memcpy(pchName, "ARK: Astraeos", sizeof("ARK: Astraeos"));
+    return true;
+  case 8:
+    *pAppID = 3571730;
+    memcpy(pchName, "ARK Animated Series 109-Costumes Pack",
+           sizeof("ARK Animated Series 109-Costumes Pack"));
+    return true;
+  case 9:
+    *pAppID = 3583650;
+    memcpy(pchName, "ARK: Lost Colony", sizeof("ARK: Lost Colony"));
     return true;
   default:
     return false;
