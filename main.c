@@ -917,7 +917,7 @@ static void asa_entry(entry_point_t entryPoint) {
   //    path, then write the module handle to descriptor
   const HMODULE steamApiModule =
       LoadLibraryW(L"..\\..\\.."
-                   L"\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv153\\Win"
+                   L"\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv157\\Win"
                    L"64\\steam_api64.dll");
   *((HMODULE *)(moduleBase + delayDesc->ModuleHandleRVA)) = steamApiModule;
   // Initialize Steam API
