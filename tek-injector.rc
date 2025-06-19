@@ -7,8 +7,8 @@
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "tek-injector.manifest"
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,2,1,0
-PRODUCTVERSION  1,2,1,0
+FILEVERSION     1,2,2,0
+PRODUCTVERSION  1,2,2,0
 FILEFLAGSMASK   0
 FILEFLAGS       0
 FILEOS          VOS_NT
@@ -21,12 +21,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "Nuclearist"
       VALUE "FileDescription", "TEK Injector"
-      VALUE "FileVersion", "1.2.1"
+      VALUE "FileVersion", "1.2.2"
       VALUE "InternalName", "tek-injector"
       VALUE "LegalCopyright", "Copyright (c) 2024-2025 Nuclearist"
       VALUE "OriginalFilename", "tek-injector.exe"
       VALUE "ProductName", "TEK Injector"
-      VALUE "ProductVersion", "1.2.1"
+      VALUE "ProductVersion", "1.2.2"
     END
   END
   BLOCK "VarFileInfo"
