@@ -1,7 +1,7 @@
 project(
   'tek-injector',
   'c', 'cpp',
-  version: '1.2.2',
+  version: '1.2.3',
   default_options: {
     'warning_level': '3',
     'c_std': 'c23',

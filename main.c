@@ -149,7 +149,7 @@ static void *isteam_apps_vtable[29];
 static struct cpp_interface_wrapper isteam_apps_wrapper;
 
 static bool return_true() { return true; }
-static int asa_get_dlc_count() { return 12; }
+static int asa_get_dlc_count() { return 13; }
 static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
                                       uint32_t *pAppID, bool *pbAvailable,
                                       char *pchName) {
@@ -203,11 +203,15 @@ static bool asa_get_dlc_data_by_index(struct cpp_interface_wrapper *_, int iDLC,
     memcpy(pchName, "ARK: Lost Colony", sizeof("ARK: Lost Colony"));
     return true;
   case 10:
+    *pAppID = 3675020;
+    memcpy(pchName, "ARK: Ragnarok Ascended", sizeof("ARK: Ragnarok Ascended"));
+    return true;
+  case 11:
     *pAppID = 3720100;
     memcpy(pchName, "ARK: Lost Colony Expansion Pass",
            sizeof("ARK: Lost Colony Expansion Pass"));
     return true;
-  case 11:
+  case 12:
     *pAppID = 3720200;
     memcpy(pchName, "ARK Fantastic Tames - Drakelings",
            sizeof("ARK Fantastic Tames - Drakelings"));
