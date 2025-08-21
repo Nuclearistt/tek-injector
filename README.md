@@ -1,40 +1,26 @@
 # TEK Injector
 [![Discord](https://img.shields.io/discord/937821572285206659?style=flat-square&label=Discord&logo=discord&logoColor=white&color=7289DA)](https://discord.gg/JBUgcwvpfc)
 
-## Overview
+tek-injector is a C/C++ library and program built on top of it for starting a game process and injecting [tek-game-runtime](https://github.com/teknology-hub/tek-game-runtime) into it.
 
-This program launches ARK: Survival Evolved or ARK: Survival Ascended and modifies behavior of certain Steam API and EOS SDK methods while not changing any game's files.
+## Using
 
-What it changes for both games:
-+ Steam API is initialized with app ID 480 (Spacewar) if it cannot be initialized with original one, which allows running the game even if it's not owned on current Steam account
-+ App and DLC ownership check methods will always return true
-+ ISteamUtils::GetAppID will return the original app ID of the game even if it's actually 480
-+ Current Steam account will be returned as app owner even if the game is used via Family Sharing
+### Executable (for regular users)
+Get `tek-injector.exe` from [releases](https://github.com/teknology-hub/tek-injector/releases), get [tek-game-runtime](https://github.com/teknology-hub/tek-game-runtime/releases), and create a valid settings file for it (see tek-game-runtime repo for details).
 
-What it changes for ARK: Survival Evolved:
-+ Server search filter is modified to not include BattlEye-protected servers (since BattlEye is not enabled on client due to its intolerance for game process modifications) and servers that don't have [TEK Wrapper](https://github.com/Nuclearistt/TEKWrapper) (due to servers without it still checking authentication token and DLC ownership)
-+ Subscribed mods list instead of actually checking subscribtions searches mods folders in Mods directory located in root folder of the game (`..\..\..\Mods` relative to ShooterGame.exe), which allows recognizing and using mods even if game is not owned on current Steam account and cannot have subscriptions, as long as files are available
-+ TODO: Add automatic mod downloads for servers via TEK Steam Client
+In the simplest use case, you can just place `libtek-game-runtime.dll` and `tek-gr-settings.json` (settings file *must* have this name) next to game's executable, then run `tek-injector.exe` and select game's executable in the dialog.
 
-What it changes for ARK: Survival Ascended (when the game is not owned on current Steam account):
-+ EOS_Connect authentication is done via an Epic Games account (you'll get a prompt in browser when launching game with it for the first time) so you can still use online subsystem and join servers
-+ CurseForge API host URL is changed to apiw.nuclearist.ru, which proxies to api.curseforge.com all requests except /v1/auth/external, for that one it returns a pre-generated valid token, which allows loading servers' mod content
+For more advanced uses, the following command-line options are available:
+|Option|Description|
+|-|-|
+|`--ti-exe-path "C:\path\to\game.exe"`|Path to the game executable so you don't have to select it manually|
+|`--ti-current-dir "C:\path\to\current\dir"`|Path to current directory for the game process. If not specified, game executable's parent directory is used|
+|`--ti-dll-path "C:\path\to\libtek-game-runtime.dll"`|Path to the tek-game-runtime DLL to inject. If not specified, [Windows' standard DLL search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#standard-search-order-for-unpackaged-apps) relative to game process is used|
+|`--ti-settings-path "C:\path\to\tek-gr-settings.json"`|Path to the settings file that tek-game-runtime should load. If not specified, it'll look for it in game's current directory|
+|`--ti-high-priority`|Run game process with high priority (via `HIGH_PRIORITY_CLASS` flag)|
+|`--ti-run-as-admin`|Run game process with admin privileges if tek-injector.exe itself is elevated. By default, it would still run the game without admin privileges, to avoid related issues|
+All other command-line options not listed here are forwarded to the game process as-is.
 
-Besides, TEK Injector has a special treatment for `-high` command-line argument which will make it run the game with high process priority class.
+### Library (for developers)
 
-`-noadmin` command-line argument can be used to start game process without admin privileges (tek-injector.exe itself requires them to do its job)
-
-## How to use
-
-Standalone: download tek-injector.exe from [releases](https://github.com/Nuclearistt/tek-injector/releases), place it in your game's `ShooterGame\Binaries\Win64` directory and run it. All command-line arguments that are passed to TEK Injector will be forwarded to the game.
-
-Embedded (for app developers): you may use TEK Injector right inside your process if you properly load its PE image (with deflating sections and filling import table), tek-injector.exe exports 2 functions that can be obtained via GetProcAddress:
-```c
-void launch_asa(const wchar_t *exePath, int argc, const wchar_t **argv);
-void launch_ase(const wchar_t *exePath, int argc, const wchar_t **argv);
-```
-where `exePath` is path to the game executable (ArkAscended.exe and ShooterGame.exe respectively), and `argc` and `argv` provide the command-line arguments for game process. Keep in mind that you don't need to set first argument to executable path, TEK Injector does it on its own and appends arguments from `argv` after it, also these functions may block for up to 10 seconds to ensure that game process doesn't return an error after launching.
-
-## How it works
-
-TEK Injector creates game process in suspended state, then allocates memory in it and copies itself into it, then modifies main thread's context so it executes custom entry point from TEK Injector's image, which modifies import address tables of game executable to use its own function wrappers where necessary and then passes executions to game's real entry point which is not even aware that something happened before it. Running TEK Injector inside game process after simply copying it is possible due to making game-side code rely only on what is bundled inside the image and kernel32.dll (which resides at the same virtual address across all processes) without any other external dependencies.
+The library comes both in static `libtek-injector.a` and dynamic (`libtek-injector.dll`/`libtek-injector.dll.a`) falvors. [tek-injector.h](https://github.com/teknology-hub/tek-injector/blob/main/include/tek-injector.h) declares a single function, `tek_inj_run_game`, that you can use with a filled `tek_inj_game_args` structure to run the game the way you need.

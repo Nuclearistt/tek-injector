@@ -1,0 +1,35 @@
+#define APSTUDIO_READONLY_SYMBOLS
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include <windows.h>
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#undef APSTUDIO_READONLY_SYMBOLS
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @file_version@
+PRODUCTVERSION  @file_version@
+FILEFLAGSMASK   0
+FILEFLAGS       0
+FILEOS          VOS_NT
+FILETYPE        VFT_DLL
+FILESUBTYPE     0
+
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "00000000"
+    BEGIN
+      VALUE "CompanyName", "TEKnology Hub"
+      VALUE "FileDescription", "TEK Injector"
+      VALUE "FileVersion", "@pretty_version@"
+      VALUE "InternalName", "tek-injector"
+      VALUE "LegalCopyright", "Copyright (c) 2025 Nuclearist"
+      VALUE "OriginalFilename", "libtek-injector.dll"
+      VALUE "ProductName", "TEK Injector"
+      VALUE "ProductVersion", "@pretty_version@"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0, 0
+  END
+END

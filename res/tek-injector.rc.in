@@ -1,14 +1,14 @@
 #define APSTUDIO_READONLY_SYMBOLS
 #define APSTUDIO_HIDDEN_SYMBOLS
-#include <Windows.h>
+#include <windows.h>
 #include <winuser.h>
 #undef APSTUDIO_HIDDEN_SYMBOLS
 #undef APSTUDIO_READONLY_SYMBOLS
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "tek-injector.manifest"
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,2,3,0
-PRODUCTVERSION  1,2,3,0
+FILEVERSION     @file_version@
+PRODUCTVERSION  @file_version@
 FILEFLAGSMASK   0
 FILEFLAGS       0
 FILEOS          VOS_NT
@@ -19,14 +19,14 @@ BEGIN
   BEGIN
     BLOCK "00000000"
     BEGIN
-      VALUE "CompanyName", "Nuclearist"
+      VALUE "CompanyName", "TEKnology Hub"
       VALUE "FileDescription", "TEK Injector"
-      VALUE "FileVersion", "1.2.3"
+      VALUE "FileVersion", "@pretty_version@"
       VALUE "InternalName", "tek-injector"
       VALUE "LegalCopyright", "Copyright (c) 2024-2025 Nuclearist"
       VALUE "OriginalFilename", "tek-injector.exe"
       VALUE "ProductName", "TEK Injector"
-      VALUE "ProductVersion", "1.2.3"
+      VALUE "ProductVersion", "@pretty_version@"
     END
   END
   BLOCK "VarFileInfo"
