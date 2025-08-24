@@ -5,6 +5,8 @@ tek-injector is a C/C++ library and program built on top of it for starting a ga
 
 ## Using
 
+The binaries are signed by Nuclearist's code signing certificate, which in turn is signed by [TEK CA](https://teknology-hub.com/public-keys/ca.crt), so they will be trusted by OS if TEK CA certificate is.
+
 ### Executable (for regular users)
 Get `tek-injector.exe` from [releases](https://github.com/teknology-hub/tek-injector/releases), get [tek-game-runtime](https://github.com/teknology-hub/tek-game-runtime/releases), and create a valid settings file for it (see tek-game-runtime repo for details).
 
