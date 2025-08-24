@@ -93,11 +93,11 @@
 
 /// Supported methods for TEK Game Runtime to load settings.
 enum tek_gr_load_type {
-  /// Settings file path is received over the pipe, tek-game-runtime reads that
-  ///    file.
+  /// Settings file path is received via file mapping, tek-game-runtime reads
+  ///    that file.
   TEK_GR_LOAD_TYPE_file_path,
-  /// Settings JSON content is received over the pipe directly.
-  TEK_GR_LOAD_TYPE_pipe
+  /// Settings JSON content is received from the file mapping directly.
+  TEK_GR_LOAD_TYPE_data
 };
 /// @copydoc tek_gr_load_type
 typedef enum tek_gr_load_type tek_gr_load_type;
@@ -132,21 +132,19 @@ enum tek_inj_res {
   TEK_INJ_RES_mem_alloc,
   /// (7) Failed to write to game process memory.
   TEK_INJ_RES_mem_write,
-  /// (8) Failed to setup security descriptor for the pipe.
+  /// (8) Failed to setup security descriptor for the file mapping.
   TEK_INJ_RES_sec_desc,
-  /// (9) Failed to create pipe.
-  TEK_INJ_RES_create_pipe,
-  /// (10) Failed to create injection thread.
+  /// (9) Failed to create file mapping.
+  TEK_INJ_RES_create_mapping,
+  /// (10) Failed to map view of the file mapping.
+  TEK_INJ_RES_map_view,
+  /// (11) Failed to create injection thread.
   TEK_INJ_RES_create_thread,
-  /// (11) Failed to connect pipe.
-  TEK_INJ_RES_connect_pipe,
-  /// (12) Failed to write to pipe.
-  TEK_INJ_RES_write_pipe,
-  /// (13) Failed to wait for injection thread to finish.
+  /// (12) Failed to wait for injection thread to finish.
   TEK_INJ_RES_thread_wait,
-  /// (14) DLL failed to load.
+  /// (13) DLL failed to load.
   TEK_INJ_RES_dll_load,
-  /// (15) Failed to resume game's main thread.
+  /// (14) Failed to resume game's main thread.
   TEK_INJ_RES_resume_thread
 };
 /// @copydoc tek_inj_res
@@ -176,8 +174,8 @@ struct tek_inj_game_args {
   tek_inj_flag flags;
   /// [In] Size of the buffer passed as @ref data, in bytes.
   uint32_t data_size;
-  /// [In] Pointer to the data to pass over the pipe. Type of data depends on
-  ///    @ref type.
+  /// [In] Pointer to the data to pass to TEK Game Runtime. Type of data depends
+  ///    on @ref type.
   const char *_Nullable data;
   /// [Out] Injection result code.
   tek_inj_res result;

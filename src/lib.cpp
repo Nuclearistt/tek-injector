@@ -26,19 +26,19 @@
 
 namespace {
 
-/// The first message sent over the pipe to TEK Game Runtime.
-struct pipe_header {
+/// The header of data for TEK Game Runtime input file mapping.
+struct data_header {
   /// Settings loading method.
   tek_gr_load_type type;
-  /// Size of the remaining data that will be sent to the pipe, in bytes. When
-  ///    @ref type is @ref TEK_GR_LOAD_TYPE_file_path, the data is path to the
-  ///    file, or "tek-gr-settings.json" in current directory if the size is
-  ///    zero. When @ref type is @ref TEK_GR_LOAD_TYPE_pipe, the data is actual
-  ///    settings JSON content.
+  /// Size of the remaining data in the file mapping, in bytes. When @ref type
+  ///    is @ref TEK_GR_LOAD_TYPE_file_path, the data is path to the file, or
+  ///    "tek-gr-settings.json" in current directory if the size is zero. When
+  ///    @ref type is @ref TEK_GR_LOAD_TYPE_data, the data is actual settings
+  ///    JSON content.
   std::uint32_t size;
 };
 
-/// RAII wrapper for most OS handles.
+/// RAII wrapper for Windows handles.
 class [[gnu::visibility("internal")]] unique_handle {
 protected:
   HANDLE value;
@@ -47,33 +47,16 @@ public:
   constexpr unique_handle() noexcept : value{nullptr} {}
   constexpr unique_handle(HANDLE handle) noexcept : value{handle} {}
   ~unique_handle() noexcept { close(); }
-  constexpr PHANDLE operator&() noexcept { return &value; }
-  constexpr operator bool() const noexcept { return static_cast<bool>(value); }
+  constexpr explicit operator bool() const noexcept {
+    return static_cast<bool>(value);
+  }
   constexpr operator HANDLE() const noexcept { return value; }
+  constexpr PHANDLE operator&() noexcept { return &value; }
+  constexpr void operator=(HANDLE handle) noexcept { value = handle; }
   void close() noexcept {
     if (value) {
       CloseHandle(value);
       value = nullptr;
-    }
-  }
-};
-
-/// RAII wrapper for file handles.
-class [[gnu::visibility("internal")]] unique_file {
-  HANDLE value;
-
-public:
-  constexpr unique_file() noexcept : value{INVALID_HANDLE_VALUE} {}
-  ~unique_file() noexcept { close(); }
-  constexpr void operator=(HANDLE handle) noexcept { value = handle; }
-  constexpr operator bool() const noexcept {
-    return value != INVALID_HANDLE_VALUE;
-  }
-  constexpr operator HANDLE() const noexcept { return value; }
-  void close() noexcept {
-    if (value != INVALID_HANDLE_VALUE) {
-      CloseHandle(value);
-      value = INVALID_HANDLE_VALUE;
     }
   }
 };
@@ -221,9 +204,9 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
     args->win32_error = GetLastError();
     return;
   }
-  // Create pipe for communication with TEK Game Runtime
-  unique_file pipe;
-  const DWORD buf_size = sizeof(pipe_header) + args->data_size;
+  // Create input file mapping for TEK Game Runtime
+  unique_handle mapping;
+  const DWORD buf_size = sizeof(data_header) + args->data_size;
   if (elevated && !(args->flags & TEK_INJ_FLAG_run_as_admin)) {
     // Initialize security descriptor with DACL that allows only current user
     //    and SACL that allows access for medium integrity level
@@ -298,25 +281,30 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
     SECURITY_ATTRIBUTES attrs{.nLength = sizeof attrs,
                               .lpSecurityDescriptor = &desc,
                               .bInheritHandle = FALSE};
-    pipe =
-        CreateNamedPipeW(L"\\\\.\\pipe\\tek-game-runtime",
-                         PIPE_ACCESS_OUTBOUND | FILE_FLAG_FIRST_PIPE_INSTANCE,
-                         PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT |
-                             PIPE_REJECT_REMOTE_CLIENTS,
-                         1, buf_size, buf_size, 0, &attrs);
+    mapping = CreateFileMappingW(INVALID_HANDLE_VALUE, &attrs, PAGE_READWRITE,
+                                 0, buf_size, L"tek-game-runtime");
   } else { // if (elevated && !(args->flags & TEK_INJ_FLAGS_run_as_admin))
-    pipe =
-        CreateNamedPipeW(L"\\\\.\\pipe\\tek-game-runtime",
-                         PIPE_ACCESS_OUTBOUND | FILE_FLAG_FIRST_PIPE_INSTANCE,
-                         PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT |
-                             PIPE_REJECT_REMOTE_CLIENTS,
-                         1, buf_size, buf_size, 0, nullptr);
+    mapping = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
+                                 0, buf_size, L"tek-game-runtime");
   } // if (elevated && !(args->flags & TEK_INJ_FLAGS_run_as_admin)) else
-  if (!pipe) {
-    args->result = TEK_INJ_RES_create_pipe;
+  if (!mapping) {
+    args->result = TEK_INJ_RES_create_mapping;
     args->win32_error = GetLastError();
     return;
   }
+  // Map view of the file mapping and write data to it
+  std::unique_ptr<VOID, decltype(&UnmapViewOfFile)> view{
+      MapViewOfFile(mapping, FILE_MAP_WRITE, 0, 0, 0), UnmapViewOfFile};
+  if (!view) {
+    args->result = TEK_INJ_RES_map_view;
+    args->win32_error = GetLastError();
+    return;
+  }
+  const auto hdr{reinterpret_cast<data_header *>(view.get())};
+  *hdr = {.type = args->type, .size = args->data_size};
+  std::ranges::copy_n(args->data, args->data_size,
+                      reinterpret_cast<char *>(hdr + 1));
+  view.reset();
   // Create the thread for injecting the DLL
   unique_handle inj_thread{
       CreateRemoteThread(process, nullptr, 0,
@@ -328,36 +316,7 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
     args->win32_error = GetLastError();
     return;
   }
-  // Wait for TEK Game Runtime to connect to the pipe
-  if (!ConnectNamedPipe(pipe, nullptr)) {
-    const auto err{GetLastError()};
-    if (err != ERROR_PIPE_CONNECTED) {
-      args->result = TEK_INJ_RES_connect_pipe;
-      args->win32_error = err;
-      return;
-    }
-  }
-  // Write header and data to the pipe, then close the pipe as it's no longer
-  //    needed
-  const pipe_header hdr{.type = args->type, .size = args->data_size};
-  DWORD bytes_written;
-  if (!WriteFile(pipe, &hdr, sizeof hdr, &bytes_written, nullptr)) {
-    args->result = TEK_INJ_RES_write_pipe;
-    args->win32_error = GetLastError();
-    return;
-  }
-  auto remaining{args->data_size};
-  for (auto next{args->data}; remaining;) {
-    if (!WriteFile(pipe, next, remaining, &bytes_written, nullptr)) {
-      args->result = TEK_INJ_RES_write_pipe;
-      args->win32_error = GetLastError();
-      return;
-    }
-    next += bytes_written;
-    remaining -= bytes_written;
-  }
-  pipe.close();
-  // Wait for injection thread to finish and close it
+  // Wait for injection thread to finish
   switch (WaitForSingleObject(inj_thread, 3000)) {
   case WAIT_OBJECT_0:
     break;
@@ -365,11 +324,13 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
     SetLastError(ERROR_TIMEOUT);
     [[fallthrough]];
   default:
-    args->result = TEK_INJ_RES_write_pipe;
+    args->result = TEK_INJ_RES_thread_wait;
     args->win32_error = GetLastError();
     TerminateThread(inj_thread, 0);
     return;
   }
+  mapping.close();
+  mem.reset();
   // Check injection thread exit code
   DWORD exit_code;
   if (GetExitCodeThread(inj_thread, &exit_code)) {
@@ -379,7 +340,6 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
     args->win32_error = GetLastError();
   }
   inj_thread.close();
-  mem.reset();
   if (!exit_code) {
     args->result = TEK_INJ_RES_dll_load;
     return;

@@ -209,6 +209,8 @@ int wmain(int argc, wchar_t *argv[]) {
   }
   std::wstring msg;
   switch (args.result) {
+  case TEK_INJ_RES_ok:
+    return EXIT_SUCCESS;
   case TEK_INJ_RES_get_token_info:
     msg = L"Failed to get process token information";
     break;
@@ -233,17 +235,14 @@ int wmain(int argc, wchar_t *argv[]) {
   case TEK_INJ_RES_sec_desc:
     msg = L"Failed to setup security descriptor for the pipe";
     break;
-  case TEK_INJ_RES_create_pipe:
-    msg = L"Failed to create pipe";
+  case TEK_INJ_RES_create_mapping:
+    msg = L"Failed to create file mapping";
+    break;
+  case TEK_INJ_RES_map_view:
+    msg = L"Failed to map view of the file mapping";
     break;
   case TEK_INJ_RES_create_thread:
     msg = L"Failed to create injection thread";
-    break;
-  case TEK_INJ_RES_connect_pipe:
-    msg = L"Failed to connect pipe";
-    break;
-  case TEK_INJ_RES_write_pipe:
-    msg = L"Failed to write to pipe";
     break;
   case TEK_INJ_RES_thread_wait:
     msg = L"Failed to wait for injection thread to finish";
