@@ -108,7 +108,16 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
     elevated = elevation_type == TokenElevationTypeFull;
   }
   // Build command line
-  std::wstring command_line;
+  std::wstring command_line{args->exe_path};
+  if (command_line.contains(L' ')) {
+    for (auto pos{command_line.find(L'"')}; pos != std::string::npos;
+         pos = command_line.find(L'"', pos)) {
+      command_line.replace(pos, 1, L"\\\"");
+      pos += 2;
+    }
+    command_line.insert(command_line.begin(), L'"');
+    command_line.push_back(L'"');
+  }
   for (auto &&arg :
        std::span{args->argv, static_cast<std::size_t>(args->argc)} |
            std::views::transform([](auto ptr) { return std::wstring{ptr}; })) {
@@ -128,9 +137,7 @@ extern "C" void tek_inj_run_game(tek_inj_game_args *args) {
       arg.insert(arg.begin(), L'"');
       arg.push_back(L'"');
     }
-    if (!command_line.empty()) {
-      command_line.push_back(L' ');
-    }
+    command_line.push_back(L' ');
     command_line.append(arg);
   }
   // Create suspended game process

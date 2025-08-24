@@ -93,7 +93,7 @@ int wmain(int argc, wchar_t *argv[]) {
   std::string settings_path;
   // Scan command line
   const std::span arg_span{argv, static_cast<std::size_t>(argc)};
-  for (auto it{arg_span.begin()}; it < arg_span.end(); ++it) {
+  for (auto it{arg_span.begin() + 1}; it < arg_span.end(); ++it) {
     const std::wstring_view view{*it};
     if (view == L"--ti-exe-path") {
       if (++it < arg_span.end()) {
